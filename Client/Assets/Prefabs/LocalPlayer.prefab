@@ -911,7 +911,8 @@ GameObject:
   - component: {fileID: 6951309742722337743}
   - component: {fileID: 1471273705189311672}
   - component: {fileID: 5465145021831776366}
-  - component: {fileID: 4853326457715779594}
+  - component: {fileID: 3973933914055154060}
+  - component: {fileID: 9218823345016254213}
   m_Layer: 0
   m_Name: LocalPlayer
   m_TagString: Untagged
@@ -1009,8 +1010,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animationManager: {fileID: 8254147234988955670}
-  interpolator: {fileID: 4853326457715779594}
---- !u!114 &4853326457715779594
+  menuManager: {fileID: 3973933914055154060}
+  interpolator: {fileID: 9218823345016254213}
+--- !u!114 &3973933914055154060
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1019,11 +1021,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 2357468117004107759}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f084c4f946d611048a7d813ec0eb18f0, type: 3}
+  m_Script: {fileID: 11500000, guid: 2b50b0493340468489536c628ac0cd1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryUI: {fileID: 2255580116377742155, guid: 95954de1ab0f4b044aebc3d5eb2348ad, type: 3}
+  menuIsOpen: 0
+--- !u!114 &9218823345016254213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2357468117004107759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6411b38a878d39f4a95588de3adf5a64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   timeElapsed: 0
-  timeToReachTarget: 0.05
+  posTimeToReachTarget: 0.05
+  rotTimeToReachTarget: 0.05
   movementThreshold: 0.05
 --- !u!1 &2456836653401222091
 GameObject:

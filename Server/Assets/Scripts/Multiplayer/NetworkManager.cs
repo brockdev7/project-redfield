@@ -45,6 +45,7 @@ public class NetworkManager : MonoBehaviour
 
     public Server Server { get; private set; }
     public ushort CurrentTick { get; private set; } = 0;
+    private bool firstSync = true;
 
     [SerializeField] private ushort port;
     [SerializeField] private ushort maxClientCount;
@@ -64,13 +65,11 @@ public class NetworkManager : MonoBehaviour
         Server.ClientDisconnected += PlayerLeft;
     }
 
+    
     private void FixedUpdate()
     {
         Server.Tick();
-
-        //Every 5 seconds @60fps
-        if (CurrentTick % 300 == 0)
-            SendSync();
+        SendSync();
 
         CurrentTick++;
     }

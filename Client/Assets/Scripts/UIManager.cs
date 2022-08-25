@@ -25,6 +25,7 @@ public class UIManager : MonoBehaviour
 
     public void Awake()
     {
+        connectUI.SetActive(true);
         Singleton = this;
     }
 
@@ -32,8 +33,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject connectUI;
     [SerializeField] private InputField usernameField;
 
-    [Header("Inventory")]
-    [SerializeField] private GameObject inventoryUI;
+
 
     //------------ CONNECT SCREEN ------------\\
     public void ConnectClicked()
@@ -50,17 +50,6 @@ public class UIManager : MonoBehaviour
         connectUI.SetActive(true);
     }
 
-    //------------ INVENTORY SCREEN ------------\\
-
-    public void OpenInventoryScreen()
-    {
-        inventoryUI.SetActive(true);
-    }
-
-    public void CloseInventoryScreen()
-    {
-        inventoryUI.SetActive(false);
-    }
 
 
     #region Message Senders

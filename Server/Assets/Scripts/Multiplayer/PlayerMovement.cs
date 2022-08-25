@@ -201,7 +201,7 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(movement);
 
         SendMovement();
-        SendRotation();
+        //SendRotation();
 
     }
 
@@ -234,6 +234,7 @@ public class PlayerMovement : MonoBehaviour
         message.AddUShort(player.Id);
         message.AddUShort(NetworkManager.Singleton.CurrentTick);
         message.AddVector3(transform.position);
+        message.AddQuaternion(transform.rotation);
         message.AddFloat(playerSpeed);
         NetworkManager.Singleton.Server.SendToAll(message);
     }

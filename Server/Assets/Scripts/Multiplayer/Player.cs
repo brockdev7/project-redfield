@@ -19,6 +19,11 @@ public class Player : MonoBehaviour
 
     [SerializeField] private PlayerMovement movement;
 
+    public void Awake()
+    {
+        isPickingUpItem = false;
+    }
+
     private void OnDestroy()
     {        
         list.Remove(Id);
@@ -26,21 +31,18 @@ public class Player : MonoBehaviour
 
     #region Player Methods
 
-    public bool AttemptingItemPickup()
+    public void AttemptItemPickup()
     {       
         if(this.Movement.isPressed("E"))
         {
             if (itemAmount >= maxItemAmount)
-                return false;
+                return;
 
             this.Movement.DisableMovement();
             isPickingUpItem = true;
+
             PickingUpItem();
-
-            return true;
         }
-
-        return false;
     }
 
     public void ExitItemPickupAnim(int _itemId)
@@ -67,7 +69,7 @@ public class Player : MonoBehaviour
             otherPlayer.SendSpawned(id);
         }
 
-        Player player = Instantiate(GameLogic.Singleton.PlayerPrefab, new Vector3(9.4f, 1f, 9.4f), Quaternion.identity).GetComponent<Player>();
+        Player player = Instantiate(GameLogic.Singleton.PlayerPrefab, new Vector3(9.4f, 0f, 9.4f), Quaternion.identity).GetComponent<Player>();
         player.name = $"Player {id} ({(string.IsNullOrEmpty(username) ? "Guest" : username)})";
         player.Id = id;
         player.Username = string.IsNullOrEmpty(username) ? $"Guest: {id}" : username;
@@ -111,14 +113,14 @@ public class Player : MonoBehaviour
     {
         Message message = Message.Create(MessageSendMode.reliable, ServerToClientId.playerPickingItemUp);
         message.AddInt(Id);
-        NetworkManager.Singleton.Server.SendToAll(message);
+        NetworkManager.Singleton.Server.Send(message,Id);
     }
 
     private void ExitItemPickup()
     {
         Message message = Message.Create(MessageSendMode.reliable, ServerToClientId.playerExitItemAnimation);
         message.AddInt(Id);
-        NetworkManager.Singleton.Server.SendToAll(message);
+        NetworkManager.Singleton.Server.Send(message,Id);
     }
 
 

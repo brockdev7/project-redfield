@@ -49,10 +49,6 @@ public class GameLogic : MonoBehaviour
         }    
     }
 
-    public void OpenInventoryMenu() => UIManager.Singleton.OpenInventoryScreen();
-    public void CloseInventoryMenu() => UIManager.Singleton.CloseInventoryScreen();
-
-
     private void Awake()
     {
         Singleton = this;

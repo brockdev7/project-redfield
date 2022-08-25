@@ -5,7 +5,6 @@ using RiptideNetworking;
 
 public class ItemSpawner : MonoBehaviour
 {
-
     public int spawnerId;
     public bool hasItem;
     public MeshRenderer itemModel;

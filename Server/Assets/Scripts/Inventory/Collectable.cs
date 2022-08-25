@@ -16,18 +16,20 @@ public abstract class Collectable : MonoBehaviour, ICollectable
         {
             Player _player = other.GetComponent<Player>();
 
-            if (_player.AttemptingItemPickup())
+            if(!_player.isPickingUpItem)
             {
-
+                _player.AttemptItemPickup();
             }
-
-            if (_player.Movement.isPressed("Esc"))
-            {               
-                _player.ExitItemPickupAnim(ItemId);
-                Collect();
-                OnItemCollected?.Invoke();
+            
+            if(_player.isPickingUpItem)
+            {
+                if (_player.Movement.isPressed("Esc"))
+                {
+                    _player.ExitItemPickupAnim(ItemId);
+                    Collect();
+                    OnItemCollected?.Invoke();
+                }
             }
-
         }
     }
 }

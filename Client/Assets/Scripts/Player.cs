@@ -10,23 +10,34 @@ public class Player : MonoBehaviour
 
     public ushort Id { get; private set; }
     public bool IsLocal { get; private set; }
+    public bool isPickingUpItem { get; private set; }
 
     [SerializeField] private PlayerAnimationManager animationManager;
-    [SerializeField] private Interpolator interpolator;
+    [SerializeField] private PlayerMenuManager menuManager;
+    [SerializeField] private InterpolatorWIP interpolator;
     
     private string username;
+
+    public void Awake()
+    {
+        if (IsLocal)
+        {
+            menuManager.Initialize();
+            isPickingUpItem = false;
+        }
+          
+    }
 
     public void OnDestroy()
     {
         list.Remove(Id);
     }
 
-    private void Move(ushort tick, Vector3 newPosition, float playerSpeed)
+    private void Move(ushort tick, Vector3 newPosition, Quaternion newRotation, float playerSpeed)
     {
-        interpolator.NewUpdate(tick, newPosition);
-
-        if(IsLocal)
-            animationManager.Animate(playerSpeed);
+        interpolator.NewPositionUpdate(tick, newPosition);
+        interpolator.NewRotationUpdate(tick, newRotation);
+        animationManager.Animate(playerSpeed);
     }
 
     private void SetRotation(Quaternion _newRotation)
@@ -68,7 +79,7 @@ public class Player : MonoBehaviour
     private static void PlayerMovement(Message message)
     {
         if (list.TryGetValue(message.GetUShort(), out Player player))
-            player.Move(message.GetUShort(),message.GetVector3(),message.GetFloat());
+            player.Move(message.GetUShort(),message.GetVector3(), message.GetQuaternion(),message.GetFloat());
     }
 
     [MessageHandler((ushort)ServerToClientId.playerRotation)]
@@ -82,12 +93,17 @@ public class Player : MonoBehaviour
     private static void PlayerPickingItemUp(Message message)
     {
         if (list.TryGetValue(message.GetUShort(), out Player player))
-        {
+        {         
             var animator = player.GetComponentInChildren<Animator>();
             animator.Play("KneelDown");
 
-            GameLogic.Singleton.OpenInventoryMenu();
-        }       
+            if(!player.isPickingUpItem)
+            {
+                player.menuManager.OpenInventoryScreen();
+                player.isPickingUpItem = true;
+            }
+            
+        }
     }
 
     [MessageHandler((ushort)ServerToClientId.playerExitItemAnimation)]
@@ -98,7 +114,11 @@ public class Player : MonoBehaviour
             var animator = player.GetComponentInChildren<Animator>();
             animator.Play("KneelUp");
 
-            GameLogic.Singleton.CloseInventoryMenu();
+            if (player.isPickingUpItem)
+            {
+                player.menuManager.CloseInventoryScreen();
+            }
+            
         }
     }
 

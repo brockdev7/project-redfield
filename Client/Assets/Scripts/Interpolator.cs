@@ -23,6 +23,7 @@ public class Interpolator : MonoBehaviour
 
     }
 
+
     private void Update()
     {
         for (int i = 0; i < futureTransformUpdates.Count; i++)
@@ -44,6 +45,23 @@ public class Interpolator : MonoBehaviour
         InterpolatePosition(timeElapsed / timeToReachTarget);
     }
 
+
+    public void NewUpdate(ushort tick, Vector3 position)
+    {
+        for (int i = 0; i < futureTransformUpdates.Count; i++)
+        {
+            if (tick < futureTransformUpdates[i].Tick)
+            {
+                futureTransformUpdates.Insert(i, new TransformUpdate(tick, position));
+                return;
+            }
+        }
+
+        futureTransformUpdates.Add(new TransformUpdate(tick, position));
+
+    }
+
+
     private void InterpolatePosition(float lerpAmount)
     {
         if((to.Position - previous.Position).sqrMagnitude < squareMovementThreshold)
@@ -54,21 +72,6 @@ public class Interpolator : MonoBehaviour
         }
 
         transform.position = Vector3.LerpUnclamped(from.Position, to.Position, lerpAmount);
-    }
-
-    public void NewUpdate(ushort tick,  Vector3 position)
-    {
-        for (int i = 0; i < futureTransformUpdates.Count; i++)
-        {
-            if(tick < futureTransformUpdates[i].Tick)
-            {
-                futureTransformUpdates.Insert(i, new TransformUpdate(tick,  position));
-                return;
-            }
-        }
-
-        futureTransformUpdates.Add(new TransformUpdate(tick, position));
-
     }
 
 
