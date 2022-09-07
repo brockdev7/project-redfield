@@ -6,9 +6,8 @@ using UnityEngine;
 [CreateAssetMenu]
 public class ItemData : ScriptableObject
 {
-    public string displayName;
-    public GameObject model;
-
+    public ushort itemId;
+    public string itemName;
 }
 
 

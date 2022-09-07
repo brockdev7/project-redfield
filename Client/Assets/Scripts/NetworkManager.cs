@@ -140,7 +140,7 @@ public class NetworkManager : MonoBehaviour
     {
         if(Mathf.Abs(ServerTick - serverTick) > tickDivergenceTolerance)
         {
-            Debug.Log($"Client tick: {ServerTick} -> {serverTick}");
+           // Debug.Log($"Client tick: {ServerTick} -> {serverTick}");
             ServerTick = serverTick;
         }
     }

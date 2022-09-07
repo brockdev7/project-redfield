@@ -83,7 +83,7 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         Initialize();
-        inputs = new bool[7];
+        inputs = new bool[9];
         currentCamera = Camera.main;
         gravityAcceleration = gravity * Time.fixedDeltaTime * Time.fixedDeltaTime;
     }
@@ -215,7 +215,9 @@ public class PlayerMovement : MonoBehaviour
             { "D", inputs[3] },
             { "E", inputs[4] },
             { "LShift", inputs[5] },
-            { "Esc", inputs[6] }
+            { "Esc", inputs[6] },
+            { "Space", inputs[7] },
+            { "Return", inputs[8] }
         };
     }
 

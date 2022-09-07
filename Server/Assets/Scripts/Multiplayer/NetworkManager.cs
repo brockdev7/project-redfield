@@ -45,7 +45,6 @@ public class NetworkManager : MonoBehaviour
 
     public Server Server { get; private set; }
     public ushort CurrentTick { get; private set; } = 0;
-    private bool firstSync = true;
 
     [SerializeField] private ushort port;
     [SerializeField] private ushort maxClientCount;
@@ -69,6 +68,9 @@ public class NetworkManager : MonoBehaviour
     private void FixedUpdate()
     {
         Server.Tick();
+
+        //Were syncing on every frame instead of once every 5 seconds like in the tutorial
+        //We can put this back if the server starts to perform badly (although obviously bad performance could be due to other reasons as well)
         SendSync();
 
         CurrentTick++;

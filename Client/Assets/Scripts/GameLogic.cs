@@ -6,7 +6,8 @@ using UnityEngine;
 public class GameLogic : MonoBehaviour
 {
     private static GameLogic _singleton;
-    private static Dictionary<int, GameObject> itemList;
+
+    public static Dictionary<int, ItemData> itemList = new Dictionary<int, ItemData>();
     public static Dictionary<int, ItemSpawner> itemSpawners = new Dictionary<int, ItemSpawner>();
 
     public static GameLogic Singleton
@@ -31,21 +32,22 @@ public class GameLogic : MonoBehaviour
     [SerializeField] private GameObject localPlayerPrefab;
     [SerializeField] private GameObject playerPrefab;
 
-    [Header("Item Prefabs")]
-    [SerializeField] private GameObject GreenHerb;
-    [SerializeField] private GameObject RedHerb;
+    [Header("Items")]
+    [SerializeField] private ItemData GreenHerb;
+    [SerializeField] private ItemData RedHerb;
 
     public void SpawnItem(int _spawnerId, Vector3 _position, bool _hasItem, int itemId)
     {       
         //Instantiate Item by Id
-        if (itemList.TryGetValue(itemId, out GameObject item))
-        {
-            GameObject _spawner = Instantiate(item, _position, item.transform.rotation);
-            _spawner.GetComponent<ItemSpawner>().Initialize(_spawnerId, _hasItem);
+        if (itemList.TryGetValue(itemId, out ItemData item))
+        {           
+            if (!GameLogic.itemSpawners.ContainsKey(_spawnerId))
+            {
+                GameObject _spawner = Instantiate(item.spawnerModel, _position, item.spawnerModel.transform.rotation);
+                _spawner.GetComponent<ItemSpawner>().Initialize(_spawnerId, _hasItem);
 
-            if(!GameLogic.itemSpawners.ContainsKey(_spawnerId))
                 itemSpawners.Add(_spawnerId, _spawner.GetComponent<ItemSpawner>());
-
+            }             
         }    
     }
 
@@ -53,7 +55,7 @@ public class GameLogic : MonoBehaviour
     {
         Singleton = this;
 
-        itemList = new Dictionary<int, GameObject>()
+        itemList = new Dictionary<int, ItemData>()
         {
             {1, GreenHerb },
             {2, RedHerb }

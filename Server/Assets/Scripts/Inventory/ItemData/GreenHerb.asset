@@ -12,5 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa7c9598b59c7474f8a17f9603aa9f28, type: 3}
   m_Name: GreenHerb
   m_EditorClassIdentifier: 
-  displayName: Green Herb
-  model: {fileID: 8160728580042584625, guid: c6f3413418aaaa14483b2156a0d72694, type: 3}
+  itemId: 1
+  itemName: Green Herb
+  itemDescription: Restores a small amount of health. Efficiency can be improved
+    by combining with other herbs.
+  RenderModel: {fileID: 8160728580042584625, guid: c6f3413418aaaa14483b2156a0d72694, type: 3}

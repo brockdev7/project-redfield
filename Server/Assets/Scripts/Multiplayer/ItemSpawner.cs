@@ -1,43 +1,40 @@
 using RiptideNetworking;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ItemSpawner : MonoBehaviour
 {   
-    public static Dictionary<int,ItemSpawner> spawners = new Dictionary<int, ItemSpawner>();
-    
     private static int nextSpawnerId = 1;
     public int spawnerItemId;
     public int spawnerId;
-    public bool hasItem = false;
+    public bool hasItem = false;   
 
     private void Start()
     {
         //Initialize ItemID from Collectable
-        var item = GetComponentInChildren<Collectable>();
+        var item = GetComponentInChildren<Item>();
 
         if(item != null)
         {
-            spawnerItemId = item.ItemId;
+            spawnerItemId = item.itemData.itemId;
         }
         
         //Initialize ItemSpawner
         hasItem = true;
         spawnerId = nextSpawnerId;
         nextSpawnerId++;
-        spawners.Add(spawnerId,this);
+
+        GameLogic.itemSpawners.Add(spawnerId,this);
     }
 
-    public void OnEnable()
+
+    public void ItemPickUp()
     {
-        Collectable.OnItemCollected += ItemPickUp;
-    }
-
-    private void ItemPickUp()
-    {      
-        hasItem = false;
         ItemPickedUp(spawnerId);
+        hasItem = false;
+        GameLogic.itemSpawners.Remove(spawnerId);
     }
 
  

@@ -9,15 +9,11 @@ public class ItemSpawner : MonoBehaviour
     public bool hasItem;
     public MeshRenderer itemModel;
 
-    private Vector3 basePosition;
-
     public void Initialize(int _spawnerId, bool _hasItem)
     {
         spawnerId = _spawnerId;
         hasItem = _hasItem;
         itemModel.enabled = _hasItem;
-
-        basePosition = transform.position;
     }
 
     public void ItemPickedUp()
@@ -36,14 +32,19 @@ public class ItemSpawner : MonoBehaviour
         bool _hasItem = message.GetBool();
         int _itemId = message.GetInt();
 
-        GameLogic.Singleton.SpawnItem(_spawnerId, _spawnerPos, _hasItem,_itemId);          
+        GameLogic.Singleton.SpawnItem(_spawnerId, _spawnerPos, _hasItem,_itemId);        
     }
 
-    [MessageHandler((ushort)ServerToClientId.itemPickedUp)]
+    [MessageHandler((int)ServerToClientId.itemPickedUp)]
     private static void ItemPickedUp(Message message)
     {
-        if (GameLogic.itemSpawners.TryGetValue(message.GetInt(), out ItemSpawner spawner))
-            spawner.ItemPickedUp();
+        var spawnerId = message.GetInt();
+
+        if (GameLogic.itemSpawners.TryGetValue(spawnerId, out ItemSpawner spawner))
+        {
+            spawner.itemModel.enabled = false;
+            spawner.hasItem = false;
+        }         
     }
 
     #endregion

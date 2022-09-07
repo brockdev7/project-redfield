@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 912294483548152169}
   - component: {fileID: 927398946601322629}
   - component: {fileID: 933542769130992735}
-  - component: {fileID: 4310545570503976}
   - component: {fileID: 5287199871097656050}
+  - component: {fileID: 6710480088032560335}
   m_Layer: 0
   m_Name: RedHerb
   m_TagString: Untagged
@@ -27,7 +27,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 909837441412757383}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 6.136866, y: 0.00000023841858, z: 22.735924}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -85,18 +85,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &4310545570503976
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 909837441412757383}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: edb17ea003833934b8b016b8ed7dd613, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!65 &5287199871097656050
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -110,3 +98,16 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.4919467, y: 0.58040464, z: 0.46749115}
   m_Center: {x: -0.008898973, y: 0.29026628, z: -0.005478382}
+--- !u!114 &6710480088032560335
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 909837441412757383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42bc01a9d55d28849bd99ed8853ac7ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemData: {fileID: 11400000, guid: 74fbddb29568fcf48a8a1f937f127ee8, type: 2}

@@ -5,8 +5,8 @@ using UnityEngine;
 public class GameLogic : MonoBehaviour
 {
     private static GameLogic _singleton;
-    public static Dictionary<int, Collectable> ItemList;
-
+    public static Dictionary<Item, ItemData> itemList = new Dictionary<Item, ItemData>();
+    public static Dictionary<int, ItemSpawner> itemSpawners = new Dictionary<int, ItemSpawner>();
 
     public static GameLogic Singleton
     {
@@ -28,14 +28,18 @@ public class GameLogic : MonoBehaviour
     [Header("Prefabs")]
     [SerializeField] private GameObject playerPrefab;
 
+    [Header("Items")]
+    [SerializeField] public Item GreenHerb;
+    [SerializeField] public Item RedHerb;
+
     private void Awake()
     {
         Singleton = this;
 
-        ItemList = new Dictionary<int, Collectable>()
+        itemList = new Dictionary<Item, ItemData>()
         {
-            { 1, gameObject.AddComponent<GreenHerb>() },
-            { 2, gameObject.AddComponent<RedHerb>() }
+            { GreenHerb, GreenHerb.itemData  },
+            { RedHerb, RedHerb.itemData  }
         };
     }
 

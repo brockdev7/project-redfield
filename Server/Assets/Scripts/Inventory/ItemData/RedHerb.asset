@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa7c9598b59c7474f8a17f9603aa9f28, type: 3}
   m_Name: RedHerb
   m_EditorClassIdentifier: 
-  displayName: Red Herb
-  model: {fileID: 909837441412757383, guid: d46c8efa15a419845ba2b59b2ac9657e, type: 3}
+  itemId: 2
+  itemName: Red Herb
+  itemDescription: Can be combined with Greeb Herbs to create a full heal.
+  RenderModel: {fileID: 909837441412757383, guid: d46c8efa15a419845ba2b59b2ac9657e, type: 3}
