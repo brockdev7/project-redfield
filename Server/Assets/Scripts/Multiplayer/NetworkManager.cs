@@ -8,9 +8,9 @@ public enum ServerToClientId : ushort
 {
     playerSpawned = 1,
     playerMovement,
-    playerRotation,
     playerPickingItemUp,
-    playerExitItemAnimation,
+    playerExitItemPickUp,
+    inventoryItemAdded,
     menuInventoryOpened,
     createItemSpawner,
     itemSpawned,
@@ -23,6 +23,7 @@ public enum ClientToServerId : ushort
     playerLoggingIn = 1,
     input,
 }
+
 
 public class NetworkManager : MonoBehaviour
 {

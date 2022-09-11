@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using RiptideNetworking;
 
 public class Item : MonoBehaviour
 {
@@ -30,12 +31,22 @@ public class Item : MonoBehaviour
 
             if (_player.Inventory.isPickingUpItem)
             {
-                if (_player.Movement.isPressed("Space") || _player.Movement.isPressed("Return"))
-                {                               
-                    _player.Inventory.ExitItemPickupAnim(_player,this);                                                        
+                if (_player.Movement.isPressed("Esc"))
+                {
+                    _player.Movement.EnableMovement();
+                    _player.Inventory.ExitItemPickup();
+                }
+
+                if (_player.Movement.isPressed("Return"))
+                {
+                    _player.Inventory.AddToInventory(_player.Id,this);
+                    _player.Movement.EnableMovement();
                 }
             }
 
         } 
     }
+
+
+
 }

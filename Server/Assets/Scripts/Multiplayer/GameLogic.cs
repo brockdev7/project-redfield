@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameLogic : MonoBehaviour
 {
     private static GameLogic _singleton;
-    public static Dictionary<Item, ItemData> itemList = new Dictionary<Item, ItemData>();
+    public static Dictionary<int, Item> itemList = new Dictionary<int, Item>();
     public static Dictionary<int, ItemSpawner> itemSpawners = new Dictionary<int, ItemSpawner>();
 
     public static GameLogic Singleton
@@ -36,10 +36,10 @@ public class GameLogic : MonoBehaviour
     {
         Singleton = this;
 
-        itemList = new Dictionary<Item, ItemData>()
+        itemList = new Dictionary<int, Item>()
         {
-            { GreenHerb, GreenHerb.itemData  },
-            { RedHerb, RedHerb.itemData  }
+            { 1, GreenHerb  },
+            { 2, RedHerb }
         };
     }
 

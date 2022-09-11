@@ -18,6 +18,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] public float playerSpeed;
     [SerializeField] public float walkSpeedModifier = 1f;
     [SerializeField] public float runSpeedModifier = 2.5f;
+    [SerializeField] public float throttle = 0f;
 
     [SerializeField]
     public Quaternion targetRotation;
@@ -140,11 +141,11 @@ public class PlayerMovement : MonoBehaviour
         if (freezeMovement)
             return;
 
-        float xInput = _inputDirection.x;
-        float zInput = _inputDirection.z;
-
         if (_inputDirection.sqrMagnitude > 1f)
             _inputDirection.Normalize();
+
+        float xInput = _inputDirection.x;
+        float zInput = _inputDirection.z;
 
         //Calculate Camera Right/Forward Axis
         Vector3 right = currentCamera.transform.right;
@@ -154,7 +155,7 @@ public class PlayerMovement : MonoBehaviour
         //Calculate forward/right movement * moveSpeed modifier
         Vector3 movement = Vector3.zero;
         movement += right * (xInput * moveSpeed * Time.deltaTime);
-        movement += forward * (zInput * moveSpeed * Time.deltaTime); 
+        movement += forward * (zInput * moveSpeed * Time.deltaTime);
 
         if (controller.isGrounded)
         {
@@ -167,13 +168,13 @@ public class PlayerMovement : MonoBehaviour
                 targetRotation = Quaternion.LookRotation(movement, Vector3.up);                
                 controller.transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             }
-
+         
             //Affect desired speed based on player state
             if (isWalking)
             {
                 //Calculate Desired Player Animation Speed
                 desiredSpeed = _inputDirection.magnitude * maxForwardSpeed * 1;
-                acceleration = isMoving ? groundAccel : groundDecel;
+                acceleration = isMoving ? groundAccel  : groundDecel ;
                 playerSpeed = Mathf.MoveTowards(playerSpeed, desiredSpeed, acceleration * Time.deltaTime);
 
                 moveSpeed = walkSpeedModifier;
@@ -183,7 +184,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 //Calculate Desired Player Animation Speed
                 desiredSpeed = _inputDirection.magnitude * maxForwardSpeed * 2;
-                acceleration = isMoving ? groundAccel : groundDecel;
+                acceleration = isMoving ? groundAccel  : groundDecel;
                 playerSpeed = Mathf.MoveTowards(playerSpeed, desiredSpeed, acceleration * Time.deltaTime);
 
                 moveSpeed = runSpeedModifier;
@@ -201,8 +202,6 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(movement);
 
         SendMovement();
-        //SendRotation();
-
     }
 
     public void UpdateKeyMap(bool[] inputs)
@@ -240,13 +239,4 @@ public class PlayerMovement : MonoBehaviour
         message.AddFloat(playerSpeed);
         NetworkManager.Singleton.Server.SendToAll(message);
     }
-
-    private void SendRotation()
-    {
-        Message message = Message.Create(MessageSendMode.unreliable, ServerToClientId.playerRotation);
-        message.AddUShort(player.Id);
-        message.AddQuaternion(transform.rotation);
-        NetworkManager.Singleton.Server.SendToAll(message);
-    }
-
 }

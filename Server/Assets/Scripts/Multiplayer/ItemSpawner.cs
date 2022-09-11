@@ -8,7 +8,7 @@ public class ItemSpawner : MonoBehaviour
 {   
     private static int nextSpawnerId = 1;
     public int spawnerItemId;
-    public int spawnerId;
+    public int Id;
     public bool hasItem = false;   
 
     private void Start()
@@ -23,27 +23,27 @@ public class ItemSpawner : MonoBehaviour
         
         //Initialize ItemSpawner
         hasItem = true;
-        spawnerId = nextSpawnerId;
+        Id = nextSpawnerId;
         nextSpawnerId++;
 
-        GameLogic.itemSpawners.Add(spawnerId,this);
+        GameLogic.itemSpawners.Add(Id,this);
     }
 
 
     public void ItemPickUp()
     {
-        ItemPickedUp(spawnerId);
+        ItemPickedUp(Id);
         hasItem = false;
-        GameLogic.itemSpawners.Remove(spawnerId);
+        GameLogic.itemSpawners.Remove(Id);
     }
 
  
     #region Message Senders
 
-    public void SpawnItem( int spawnerId, Vector3 spawnerPos, bool hasItem, int itemId)
+    public void SpawnItem( int Id, Vector3 spawnerPos, bool hasItem, int itemId)
     {
         Message message = Message.Create(MessageSendMode.reliable, ServerToClientId.createItemSpawner);
-        message.AddInt(spawnerId);
+        message.AddInt(Id);
         message.AddVector3(spawnerPos);
         message.AddBool(hasItem);
         message.AddInt(itemId);

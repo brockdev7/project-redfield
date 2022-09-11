@@ -14,7 +14,6 @@ public class Player : MonoBehaviour
     public PlayerMovement Movement => movement;
     public PlayerInventory Inventory => inventory;
 
-
     [SerializeField] private PlayerInventory inventory;
     [SerializeField] private PlayerMovement movement;
 
@@ -31,7 +30,7 @@ public class Player : MonoBehaviour
         //Send Server ItemSpawner data to client
         foreach (ItemSpawner _itemSpawner in GameLogic.itemSpawners.Values)
         {
-            _itemSpawner.SpawnItem(_itemSpawner.spawnerId, _itemSpawner.transform.position, _itemSpawner.hasItem, _itemSpawner.spawnerItemId);
+            _itemSpawner.SpawnItem(_itemSpawner.Id, _itemSpawner.transform.position, _itemSpawner.hasItem, _itemSpawner.spawnerItemId);
         }
 
         //Sends existing players spawn data to newly connected client
