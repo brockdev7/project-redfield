@@ -1323,6 +1323,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4273835066813127204}
   - component: {fileID: 538606263837281199}
+  - component: {fileID: 1873049113605523212}
   - component: {fileID: 5756570586256119701}
   m_Layer: 0
   m_Name: Adam
@@ -1359,8 +1360,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animationManager: {fileID: 7968987916163847590}
-  menuManager: {fileID: 0}
+  inventory: {fileID: 1873049113605523212}
   interpolator: {fileID: 5756570586256119701}
+--- !u!114 &1873049113605523212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3460003619950117022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3f154030fcb8164a845899d362dd111, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  list: []
 --- !u!114 &5756570586256119701
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1373,7 +1387,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6411b38a878d39f4a95588de3adf5a64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeElapsed: 0
+  posTimeElapsed: 0
+  rotTimeElapsed: 0
   posTimeToReachTarget: 0.05
   rotTimeToReachTarget: 0.05
   movementThreshold: 0.05

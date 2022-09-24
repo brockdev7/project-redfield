@@ -11,6 +11,7 @@ public enum ServerToClientId : ushort
     playerPickingItemUp,
     playerExitItemPickUp,
     inventoryItemAdded,
+    inventoryUpdate,
     menuInventoryOpened,
     createItemSpawner,
     itemSpawned,
@@ -21,6 +22,7 @@ public enum ServerToClientId : ushort
 public enum ClientToServerId : ushort
 {
     playerLoggingIn = 1,
+    inventorySlotSelect,
     input,
 }
 

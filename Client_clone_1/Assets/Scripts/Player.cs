@@ -29,11 +29,6 @@ public class Player : MonoBehaviour
         animationManager.Animate(playerSpeed);
     }
 
-    private void SetRotation(Quaternion _newRotation)
-    {
-        transform.rotation = _newRotation;
-    }
-
     public static void Spawn(ushort id, string username, Vector3 position)
     {
         Player player;
@@ -53,9 +48,7 @@ public class Player : MonoBehaviour
         player.Id = id;
         player.username = username;
 
-        list.Add(id, player);
-
-        UIManager.Singleton.UpdateTeammateFrames();
+        list.Add(id, player);   
     }
 
     #region Message Handlers
@@ -64,6 +57,7 @@ public class Player : MonoBehaviour
     private static void SpawnPlayer(Message message)
     {
         Spawn(message.GetUShort(), message.GetString(), message.GetVector3());
+        UIManager.Singleton.AssignTeamFrames();           
     }
 
     [MessageHandler((ushort)ServerToClientId.playerMovement)]

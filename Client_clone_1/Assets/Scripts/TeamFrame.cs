@@ -4,5 +4,13 @@ using UnityEngine;
 
 public class TeamFrame : MonoBehaviour
 {
-    [SerializeField] public Player teammate;
+    [SerializeField] private int teammateId;
+    public int TeammateId => teammateId;
+
+    public void SetTeammate(int playerId)
+    {
+        teammateId = playerId;
+    }
+
+
 }

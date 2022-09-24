@@ -6,9 +6,8 @@ using UnityEngine;
 public class GameLogic : MonoBehaviour
 {
     private static GameLogic _singleton;
-
+    public static Dictionary<ushort, ItemSpawner> itemSpawners = new Dictionary<ushort, ItemSpawner>();
     public static Dictionary<int, ItemData> itemList = new Dictionary<int, ItemData>();
-    public static Dictionary<int, ItemSpawner> itemSpawners = new Dictionary<int, ItemSpawner>();
 
     public static GameLogic Singleton
     {
@@ -36,7 +35,15 @@ public class GameLogic : MonoBehaviour
     [SerializeField] private ItemData GreenHerb;
     [SerializeField] private ItemData RedHerb;
 
-    public void SpawnItem(int _spawnerId, Vector3 _position, bool _hasItem, int itemId)
+    public ItemData GetItemData(ushort itemId)
+    {
+        if (itemList.TryGetValue(itemId, out ItemData item))
+            return item;
+
+        return null;
+    }
+
+    public void SpawnItem(ushort _spawnerId, Vector3 _position, bool _hasItem, ushort itemId)
     {       
         //Instantiate Item by Id
         if (itemList.TryGetValue(itemId, out ItemData item))
@@ -54,7 +61,6 @@ public class GameLogic : MonoBehaviour
     private void Awake()
     {
         Singleton = this;
-
         itemList = new Dictionary<int, ItemData>()
         {
             {1, GreenHerb },

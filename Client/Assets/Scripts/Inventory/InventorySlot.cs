@@ -1,32 +1,49 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class InventorySlot : MonoBehaviour, ISelectHandler, IDeselectHandler, IMoveHandler , ISubmitHandler
 {
+    [SerializeField] public int id;
     [SerializeField] public bool isSelected = false;
-    [SerializeField] public bool hasItem = false;
+    [SerializeField] public Image slotImage;
     [SerializeField] public Image icon;
+    [SerializeField] public string itemName;
+    [SerializeField] public string itemDesc;
 
+    public GameObject renderModel;
+    
     public static event Action<InventorySlot> OnInventorySlotSubmit;
     public static event Action<InventorySlot> OnInventorySlotMove;
 
     private Color defaultColor = new Color(255, 255, 255, 0.1294118f);
     private Color selectedColor = new Color(255, 255, 255, 1f);
+    public void SetDefaultColor() => slotImage.color = defaultColor;
+    public void SetSelectedColor() => slotImage.color = selectedColor;
 
-    private ItemData itemData;
-    public ItemData ItemData => itemData;
-
-    public void SetItemData(ItemData _item)
+    //Initialize Slot
+    public void Set(ItemData itemData)
     {
-        itemData = _item;
+        icon.sprite = itemData.icon;
+        icon.enabled = true;
+        itemName = itemData.itemName;
+        itemDesc = itemData.itemDescription; 
+        renderModel = itemData.renderModel;
     }
 
-    public void SetDefaultColor() => icon.color = defaultColor;
-    public void SetSelectedColor() => icon.color = selectedColor;
+    //Remove Slot
+    public void Remove()
+    {
+        icon = null;
+        icon.enabled = false;
+        itemName = String.Empty;
+        itemDesc = String.Empty;
+        renderModel = null;
+    }
 
     public void OnMove(AxisEventData eventData)
     {
@@ -41,16 +58,14 @@ public class InventorySlot : MonoBehaviour, ISelectHandler, IDeselectHandler, IM
     public void OnSelect(BaseEventData eventData)
     {
         isSelected = eventData.selectedObject == this.gameObject ? true : false;
-        icon.color = selectedColor;
+        slotImage.color = selectedColor;
     }
 
     public void OnDeselect(BaseEventData eventData)
     {
-        icon.color = defaultColor;
+        slotImage.color = defaultColor;
     }
 
-    //Item Added to Slot
-    //Submit buttons changed to either (Return) or (Space)
     public void OnSubmit(BaseEventData eventData)
     {
         OnInventorySlotSubmit?.Invoke(this);

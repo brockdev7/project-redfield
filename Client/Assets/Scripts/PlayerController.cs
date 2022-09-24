@@ -43,17 +43,18 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.Return))
             inputs[8] = true;
 
+
         if (Input.GetKeyUp(KeyCode.Tab))
         {
             //Must be in View mode to toggle at will (prevent tabbing out of picking up item)
-            if(UIManager.Singleton.inventoryMode == (int)UIManager.InventoryMode.view)
+            if(UIManager.Singleton.CurrentInventoryMode == (int)UIManager.InventoryMode.view)
                 ToggleInventoryScreen();
         }
 
         if (Input.GetKeyUp(KeyCode.Escape))
         {
             //Exit Item Pickup Screen
-            if (UIManager.Singleton.inventoryMode == (int)UIManager.InventoryMode.pickUp)
+            if (UIManager.Singleton.CurrentInventoryMode == (int)UIManager.InventoryMode.pickUp)
             {
                 UIManager.Singleton.CloseInventoryScreen();
             }              
@@ -71,8 +72,7 @@ public class PlayerController : MonoBehaviour
     public void ToggleInventoryScreen()
     {
         if (UIManager.Singleton.inventoryScreenIsActive)
-        {
-            
+        {          
             UIManager.Singleton.CloseInventoryScreen();
             movementDisabled = false;
         }

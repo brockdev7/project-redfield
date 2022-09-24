@@ -19,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] public float walkSpeedModifier = 1f;
     [SerializeField] public float runSpeedModifier = 2.5f;
     [SerializeField] public float throttle = 0f;
+    [SerializeField] public GameObject lookDirection;
 
     [SerializeField]
     public Quaternion targetRotation;
@@ -30,6 +31,8 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed = 3f;
     public float rotationSpeed = 3f;
     public float maxForwardSpeed = 3f;
+    public Vector3 inputDirection;
+
     float desiredSpeed;
     float acceleration;
     private bool didTeleport;
@@ -90,10 +93,13 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void FixedUpdate()
-    {     
+    {
+        if(lookDirection)
+            Debug.DrawRay(lookDirection.transform.position, lookDirection.transform.forward, Color.green);
+
         UpdateKeyMap(inputs);
 
-        Vector3 inputDirection = Vector3.zero;
+        inputDirection = Vector3.zero;
 
         if (InputMap["W"])
             inputDirection.z += 1;
@@ -108,9 +114,7 @@ public class PlayerMovement : MonoBehaviour
             inputDirection.x += 1;
 
         Move(inputDirection);
-
-        var lookDirection = transform.Find("LookDirection");
-        Debug.DrawRay(lookDirection.position, transform.forward, Color.green);
+    
     }
 
     public bool isPressed(string button)

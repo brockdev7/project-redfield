@@ -997,6 +997,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9535b49da940ed547aa984e8083386fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  movementDisabled: 0
 --- !u!114 &5465145021831776366
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1010,7 +1011,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animationManager: {fileID: 8254147234988955670}
-  playerInventory: {fileID: 2297523853721399619}
+  inventory: {fileID: 2297523853721399619}
   interpolator: {fileID: 9218823345016254213}
 --- !u!114 &2297523853721399619
 MonoBehaviour:

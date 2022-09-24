@@ -5,12 +5,12 @@ using RiptideNetworking;
 
 public class ItemSpawner : MonoBehaviour
 {
-    public int spawnerId;
+    public ushort spawnerId;
     public bool hasItem;
     public MeshRenderer itemModel;
     public ParticleSystem glowEffect;
 
-    public void Initialize(int _spawnerId, bool _hasItem)
+    public void Initialize(ushort _spawnerId, bool _hasItem)
     {
         spawnerId = _spawnerId;
         hasItem = _hasItem;
@@ -29,10 +29,10 @@ public class ItemSpawner : MonoBehaviour
     [MessageHandler((ushort)ServerToClientId.createItemSpawner)]
     private static void SpawnItem(Message message)
     {
-        int _spawnerId = message.GetInt();
+        ushort _spawnerId = message.GetUShort();
         Vector3 _spawnerPos = message.GetVector3();
         bool _hasItem = message.GetBool();
-        int _itemId = message.GetInt();
+        ushort _itemId = message.GetUShort();
 
         GameLogic.Singleton.SpawnItem(_spawnerId, _spawnerPos, _hasItem,_itemId);        
     }
@@ -40,7 +40,7 @@ public class ItemSpawner : MonoBehaviour
     [MessageHandler((int)ServerToClientId.itemPickedUp)]
     private static void ItemPickedUp(Message message)
     {
-        var spawnerId = message.GetInt();
+        var spawnerId = message.GetUShort();
 
         //Pick Up Item Spawner
         if (GameLogic.itemSpawners.TryGetValue(spawnerId, out ItemSpawner spawner))

@@ -6,28 +6,16 @@ using static UIManager;
 
 public class PlayerInventory : MonoBehaviour
 {
+    [SerializeField] public List<ItemData> list = new List<ItemData>();
 
-    private List<ItemData> list { get; set; } = new List<ItemData>();
-
-
-    public void Add(ItemData _itemData)
-    {
-        list.Add(_itemData);
-    }
-
-    public void Remove(ItemData _itemData)
-    {
-        list.Remove(_itemData);
-    }
-
-
+    #region Message Handlers
     [MessageHandler((ushort)ServerToClientId.playerPickingItemUp)]
     private static void PlayerPickingItemUp(Message message)
     {
         if (Player.list.TryGetValue(message.GetUShort(), out Player player))
         {
             var itemId = message.GetUShort();
-            var spawnerId = message.GetInt();
+            var spawnerId = message.GetUShort();
 
             player.animationManager.EnterItemPickUp();
 
@@ -46,24 +34,48 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-
     [MessageHandler((ushort)ServerToClientId.inventoryItemAdded)]
     private static void InventoryItemAdded(Message message)
     {
         if (Player.list.TryGetValue(message.GetUShort(), out Player player))
         {
             var itemId = message.GetUShort();
-            var itemData = GameLogic.itemList[itemId];
-            var selectedSlot = UIManager.Singleton.GetSelectedSlot();
+            var itemData = GameLogic.Singleton.GetItemData(itemId);
+            var slotId = message.GetUShort();
 
-            selectedSlot.SetItemData(itemData);
-            UIManager.Singleton.AddToSlot(selectedSlot);
-                    
+            var slot = UIManager.Singleton.GetInventorySlot(slotId);
+
+            //Update Slot Data
+            if(slot)
+                slot.Set(itemData);
+
+            //Add Item To Inventory
+            player.inventory.list.Add(itemData);
+  
+            //Exit Player Kneel Animation
             player.animationManager.ExitItemPickUp();
 
-            UIManager.Singleton.CloseInventoryScreen();
+            UIManager.Singleton.SetViewMode(InventoryMode.view);
+            UIManager.Singleton.CloseInventoryScreen();          
         }
     }
+
+    [MessageHandler((ushort)ServerToClientId.inventoryUpdate)]
+    private static void InventoryUpdate(Message message)
+    {    
+        if (Player.list.TryGetValue(message.GetUShort(), out Player teammate))
+        {
+            var itemId = message.GetUShort();
+            var itemData = GameLogic.Singleton.GetItemData(itemId);
+            var slotId = message.GetUShort();
+
+            teammate.inventory.list.Add(itemData);
+            UIManager.Singleton.AddToTeammateInventory(teammate.Id,itemData,slotId);
+
+            Debug.Log($"{teammate.gameObject.name} has added a {itemData.itemName} to their inventory.");
+        }      
+    }
+    #endregion
 
 
 

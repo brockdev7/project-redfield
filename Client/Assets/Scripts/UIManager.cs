@@ -61,47 +61,72 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject inventoryScreen;
     [SerializeField] private GameObject header;
     [SerializeField] private GameObject renderView;
-    [SerializeField] private GameObject teamFrames;
     [SerializeField] private Button slot1;  
     [SerializeField] private TextMeshProUGUI itemName;
     [SerializeField] private TextMeshProUGUI itemDesc;
-  
-    public int inventoryMode;
-    [SerializeField] public List<InventorySlot> inventorySlots;
+    [SerializeField] private List<InventorySlot> inventorySlots;
+    [SerializeField] private GameObject teamFrames;
+    [SerializeField] private int inventoryMode;
+
+    public int CurrentInventoryMode => inventoryMode;
 
     public bool inventoryScreenIsActive { get { return inventoryScreen.activeInHierarchy; } }
-    public bool inventorySlotSelected {  get { return inventorySlots.Any(s => s.isSelected);  } }
-
     public enum InventoryMode
     {
         view = 1,
         pickUp
     }
-    
+
+    #region Methods
+    //View Mode
+    public void OpenInventoryScreen()
+    {
+        SetViewMode(InventoryMode.view);
+        RedrawInventorySlots();
+        EnableHeaderButtons();
+        UpdateInventoryData(slot1.GetComponent<InventorySlot>());
+        inventoryScreen.SetActive(true);
+    }
+
+    //Pickup Mode
+    public void OpenInventoryScreen(ushort _itemId, ushort _spawnerId, Player _player)
+    {
+        SetViewMode(InventoryMode.pickUp);
+
+        var itemData = GameLogic.Singleton.GetItemData(_itemId);
+
+        if (itemData)
+        {
+            DisableHeaderButtons();
+            inventoryScreen.SetActive(true);
+            slot1.Select();
+
+            Instantiate(itemData.renderModel, renderView.transform, false);
+
+            itemName.text = itemData.itemName;
+            itemDesc.text = "Will you take it?";
+        }
+    }
+    public void CloseInventoryScreen()
+    {
+        CleanupInventoryScreen();
+
+        inventoryScreen.SetActive(false);
+    }
+
     public void SetViewMode(InventoryMode mode)
     {
         inventoryMode = (int)mode;
     }
 
-    public void UpdateTeammateFrames()
-    {      
-        List<Player> playerList = Player.list.Values.Where(x => !x.IsLocal).ToList();
-        List<GameObject> frameList = new List<GameObject>();
-
-        if(playerList.Count > 0)
+    public InventorySlot GetInventorySlot(ushort id)
+    {
+        foreach (var slot in inventorySlots)
         {
-            Debug.Log("Updating teammate frames...");
-
-            foreach (Transform frame in teamFrames.transform)
-                frameList.Add(frame.gameObject);
-
-            for (int x = 0; x < playerList.Count(); x++)
-            {                
-                GameObject frameObj = frameList[x].gameObject;
-                var teamFrame = frameObj.GetComponent<TeamFrame>();
-                teamFrame.teammate = playerList[x];
-            }
-        }    
+            if (slot.id == id)
+                return slot;
+        }
+        return null;
     }
 
     public void RedrawInventorySlots()
@@ -112,7 +137,7 @@ public class UIManager : MonoBehaviour
         invSlot.SetSelectedColor();
         invSlot.isSelected = true;
 
-        slot1.Select();    
+        slot1.Select();
     }
 
     public void DeselectAll()
@@ -124,42 +149,103 @@ public class UIManager : MonoBehaviour
         }
     }
 
-
-    public InventorySlot GetSelectedSlot()
+    public void EnableHeaderButtons()
     {
-        foreach(InventorySlot slot in inventorySlots)
+        foreach (Transform child in header.transform)
         {
-            if (slot.isSelected)
-                return slot;
+            child.gameObject.SetActive(true);
+        }
+    }
+
+    public void DisableHeaderButtons()
+    {
+        foreach (Transform child in header.transform)
+        {
+            child.gameObject.SetActive(false);
+        }
+    }
+
+    public void CleanupInventoryScreen()
+    {
+        //Destroy any previous 3D Obj render
+        if (renderView.transform.childCount > 0)
+        {
+            foreach (Transform child in renderView.transform)
+            {
+                GameObject.DestroyImmediate(child.gameObject);
+            }
+        }
+    }
+
+    public void InitializeObjectViewer()
+    {
+        //Add 3D Obj Camera to Main Camera Stack
+        Camera objCamera = inventoryScreen.GetComponentInChildren<Camera>();
+        Camera mainCamera = Camera.main;
+        UniversalAdditionalCameraData mainCameraData = mainCamera.GetUniversalAdditionalCameraData();
+        mainCameraData.cameraStack.Add(objCamera);
+
+        //Set Canvas Render Camera
+        Canvas invCanvas = inventoryScreen.GetComponent<Canvas>();
+        invCanvas.worldCamera = GameObject.Find("UICamera").GetComponent<Camera>();
+    }
+
+    #endregion
+
+    #region Teammate Inventory Methods
+    public void AddToTeammateInventory(int teammateId, ItemData item, int slotId)
+    {
+        var frame = GetTeammateFrame(teammateId);
+   
+        if(frame)
+        {
+            var invSlots = frame.GetComponentsInChildren<InventorySlot>();
+            foreach(var slot in invSlots)
+            {
+                if (slot.id == slotId)
+                    slot.Set(item);
+            }
+        }
+    }
+
+    public GameObject GetTeammateFrame(int teammateId)
+    {
+        foreach(Transform transform in teamFrames.transform)
+        {
+            var teamFrame = transform.gameObject.GetComponent<TeamFrame>();
+            if (teamFrame.TeammateId == teammateId)
+                return teamFrame.gameObject;
         }
 
         return null;
     }
 
-    public void AddToSlot(InventorySlot _slot)
+    public void AssignTeamFrames()
     {
-        if (_slot.hasItem)
+        List<Player> playerList = Player.list.Values.Where(x => !x.IsLocal).ToList();
+        List<GameObject> frameList = new List<GameObject>();
+
+        if (playerList.Count > 0)
         {
-            //TODO: Drop Item on Ground
-            Debug.Log($"Slot already contained:{_slot.ItemData.itemName};");
+            Debug.Log("Assigning teammate inventory frames...");
+
+            foreach (Transform frame in teamFrames.transform)
+                frameList.Add(frame.gameObject);
+
+            for (int x = 0; x < playerList.Count(); x++)
+            {
+                GameObject frameObj = frameList[x].gameObject;
+                var teamFrame = frameObj.GetComponent<TeamFrame>();
+                teamFrame.SetTeammate(playerList[x].Id);
+                teamFrame.gameObject.SetActive(true);
+            }
         }
-
-        Debug.Log($"{_slot.ItemData.itemName} added to Slot:{_slot.gameObject.name}");
-
-        //Update Slot Item Data
-        _slot.hasItem = true;
-
-        //Update Slot Icon
-        var slotIcon = _slot.transform.Find("Icon").GetComponent<Image>();
-        slotIcon.sprite = _slot.ItemData.icon;
-        slotIcon.enabled = true;
-
-
-        //Reset back to View
-        SetViewMode(InventoryMode.view);
     }
 
+    #endregion
+
     #region Events
+
     public void UpdateInventoryData(InventorySlot _slot)
     {
         if (inventoryMode == (int)InventoryMode.view)
@@ -173,22 +259,17 @@ public class UIManager : MonoBehaviour
                 }
             }
 
-            if (_slot.hasItem)
-            {              
-                var renderObj = Instantiate(_slot.ItemData.renderModel, renderView.transform, false);
-
-                //Update Item Info
-                itemName.text = _slot.ItemData.itemName;
-                itemDesc.text = _slot.ItemData.itemDescription;
-            }
-            else
+            //Update RenderModel
+            if (_slot.renderModel)
             {
-                //Clear Item Info
-                itemName.text = "";
-                itemDesc.text = "";
+                var renderObj = Instantiate(_slot.renderModel, renderView.transform, false);
             }
+
+            //Update Item Info
+            itemName.text = _slot.itemName;
+            itemDesc.text = _slot.itemDesc;
         }
-        
+
     }
 
     public void SubmitInventorySlot(InventorySlot _slot)
@@ -199,117 +280,16 @@ public class UIManager : MonoBehaviour
             Debug.Log($"{_slot.gameObject.name} selected.");
         }
 
-        // ------ PICK UP MODE ----------
-        if (inventoryMode == (int)InventoryMode.pickUp)
-        {
-            if (_slot.hasItem)
-            {
-                //TODO: Drop Item on Ground
-                Debug.Log($"Slot already contained:{_slot.ItemData.itemName};");
-            }
-        }
     }
 
     #endregion
-
-    //View Mode
-    public void OpenInventoryScreen()
-    {
-        SetViewMode(InventoryMode.view);
-
-        RedrawInventorySlots();
-        EnableHeaderButtons();
-        UpdateInventoryData(slot1.GetComponent<InventorySlot>());
-
-        //Activate teammate frames
-        foreach (Transform child in teamFrames.transform)
-        {
-            var frameObj = child.gameObject;
-            var teamFrame = frameObj.GetComponent<TeamFrame>();
-
-            if (teamFrame.teammate)
-            {
-                //UpdateTeammateSlot(teamFrame);
-                teamFrame.gameObject.SetActive(true);              
-            }
-        }
-
-        inventoryScreen.SetActive(true);
-    }
-
-    //Pickup Mode
-    public void OpenInventoryScreen(int _itemId, int _spawnerId, Player _player)
-    {
-        SetViewMode(InventoryMode.pickUp);
-
-        if (GameLogic.itemList.TryGetValue(_itemId, out ItemData item))
-        {
-            DisableHeaderButtons();
-            inventoryScreen.SetActive(true);
-            slot1.Select();
-
-            Instantiate(item.renderModel, renderView.transform, false);
-
-            itemName.text = item.itemName;
-            itemDesc.text = "Will you take it?";
-        }
-    }
-
-    public void UpdateTeammateSlot(TeamFrame frame)
-    {
-        var slots = frame.GetComponentsInChildren<InventorySlot>();  
-    }
-
-    public void EnableHeaderButtons()
-    {
-        foreach (Transform child in header.transform)
-        {
-            child.gameObject.SetActive(true);
-        }
-    }
-
-    public void DisableHeaderButtons()
-    {
-        foreach(Transform child in header.transform)
-        {
-            child.gameObject.SetActive(false);
-        }
-    }
-
-    public void CloseInventoryScreen()
-    {
-        CleanupInventoryScreen();
-
-        inventoryScreen.SetActive(false);
-    }
-
-    public void CleanupInventoryScreen()
-    {
-        ////Destroy Model Preview & Reset CurrentItem
-        //if (currentModel)
-        //    GameObject.DestroyImmediate(currentModel);
-
-        //if (currentItem)
-        //    currentItem = null;
-
-        //if (currentPlayer)
-        //    currentPlayer = null;
-
-        //Destroy any previous 3D Obj render
-        if (renderView.transform.childCount > 0)
-        {
-            foreach (Transform child in renderView.transform)
-            {
-                GameObject.DestroyImmediate(child.gameObject);
-            }
-        }
-    }
 
 
     //-----------------------------------------------------------------------------
     // CONNECT SCREEN
     //-----------------------------------------------------------------------------
 
+    #region Connect Screen
     [Header("Connect Screen")]
     [Header("-------------------------------------")]
     [SerializeField] private GameObject connectScreen;
@@ -329,6 +309,11 @@ public class UIManager : MonoBehaviour
         connectScreen.SetActive(true);
     }
 
+    #endregion
+
+    //-----------------------------------------------------------------------------
+    // MESSAGES
+    //-----------------------------------------------------------------------------
 
     #region Message Senders
 
@@ -340,20 +325,14 @@ public class UIManager : MonoBehaviour
     }
 
 
+    public void SlotSelected()
+    {
+        Message message = Message.Create(MessageSendMode.reliable, ClientToServerId.inventorySlotSelect);   
+        NetworkManager.Singleton.Client.Send(message);
+    }
+
     #endregion
 
-    public void InitializeObjectViewer()
-    {
-        //Add 3D Obj Camera to Main Camera Stack
-        Camera objCamera = inventoryScreen.GetComponentInChildren<Camera>();
-        Camera mainCamera = Camera.main;
-        UniversalAdditionalCameraData mainCameraData = mainCamera.GetUniversalAdditionalCameraData();
-        mainCameraData.cameraStack.Add(objCamera);
-
-        //Set Canvas Render Camera
-        Canvas invCanvas = inventoryScreen.GetComponent<Canvas>();
-        invCanvas.worldCamera = GameObject.Find("UICamera").GetComponent<Camera>();
-    }
 
 
 
