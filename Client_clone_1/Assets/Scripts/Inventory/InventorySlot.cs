@@ -8,12 +8,12 @@ using UnityEngine.UI;
 
 public class InventorySlot : MonoBehaviour, ISelectHandler, IDeselectHandler, IMoveHandler , ISubmitHandler
 {
-    [SerializeField] public int id;
+    [SerializeField] public ushort id;
     [SerializeField] public bool isSelected = false;
+    [SerializeField] public bool hasItem = false;
     [SerializeField] public Image slotImage;
     [SerializeField] public Image icon;
-    [SerializeField] public string itemName;
-    [SerializeField] public string itemDesc;
+    [SerializeField] public ItemData itemData;
 
     public GameObject renderModel;
     
@@ -26,13 +26,13 @@ public class InventorySlot : MonoBehaviour, ISelectHandler, IDeselectHandler, IM
     public void SetSelectedColor() => slotImage.color = selectedColor;
 
     //Initialize Slot
-    public void Set(ItemData itemData)
+    public void Set(ItemData _itemData)
     {
+        itemData = _itemData;
         icon.sprite = itemData.icon;
         icon.enabled = true;
-        itemName = itemData.itemName;
-        itemDesc = itemData.itemDescription; 
         renderModel = itemData.renderModel;
+        hasItem = true;
     }
 
     //Remove Slot
@@ -40,19 +40,20 @@ public class InventorySlot : MonoBehaviour, ISelectHandler, IDeselectHandler, IM
     {
         icon = null;
         icon.enabled = false;
-        itemName = String.Empty;
-        itemDesc = String.Empty;
         renderModel = null;
+        hasItem = false;
     }
 
     public void OnMove(AxisEventData eventData)
     {
         isSelected = eventData.selectedObject == this.gameObject ? true : false;
-
         var invSlot = eventData.selectedObject.GetComponent<InventorySlot>();
 
+        //Fire OnInventorySlotMove event if button has a inv slot
         if (invSlot)
-            OnInventorySlotMove?.Invoke(invSlot);          
+            OnInventorySlotMove?.Invoke(invSlot);
+        else
+            UIManager.Singleton.ClearInventoryData();
     }
 
     public void OnSelect(BaseEventData eventData)
@@ -68,6 +69,8 @@ public class InventorySlot : MonoBehaviour, ISelectHandler, IDeselectHandler, IM
 
     public void OnSubmit(BaseEventData eventData)
     {
+        //UIManager.Singleton.inventoryAudio.PlayActionMenuOpen();
+
         OnInventorySlotSubmit?.Invoke(this);
     }
 }

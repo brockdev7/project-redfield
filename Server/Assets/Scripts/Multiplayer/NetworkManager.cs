@@ -22,7 +22,7 @@ public enum ServerToClientId : ushort
 public enum ClientToServerId : ushort
 {
     playerLoggingIn = 1,
-    inventorySlotSelect,
+    actionMenu_Use,
     input,
 }
 

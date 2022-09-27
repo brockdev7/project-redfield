@@ -6,15 +6,15 @@ using System.Linq;
 
 public class Player : MonoBehaviour
 {
+    public ushort Id { get; private set; }
+    public string Username { get; private set; }
+    [SerializeField] public float HealthPoints = 70f;
+
     public static Dictionary<ushort, Player> list = new Dictionary<ushort, Player>();
     public  List<Player> otherPlayers
     {
         get { return list.Values.Where(x => x.Id != this.Id).ToList(); }
     }
-
-    public ushort Id { get; private set; }
-    public string Username { get; private set; }
-
 
     public PlayerMovement Movement => movement;
     public PlayerInventory Inventory => inventory;

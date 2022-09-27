@@ -1,4 +1,5 @@
-﻿using RiptideNetworking;
+﻿using Assets.Scripts.Multiplayer;
+using RiptideNetworking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,13 +24,9 @@ public class PlayerInventory : MonoBehaviour
     public ItemData isHolding { get; set; }
     private int _slotSize;
 
-
     public void AddToInventory(Item item)
     {
         Debug.Log($"Player added {item.itemData.itemName} to their inventory.");
-
-        //Remove item from Item Spawner
-        item.itemSpawner.ItemPickUp();
 
         //Add Item to Inventory & Slot
         var selectedSlot = GetSelectedSlot();
@@ -45,19 +42,26 @@ public class PlayerInventory : MonoBehaviour
 
             //Slot Doesn't Have Item
             if (!selectedSlot.hasItem)
-            {
-                //Get Next Available Slot
+            {            
+                //Place item in next available slot
                 var slot = GetNextAvailableSlot();
-                slot.Set(item.itemData);
+                slot.Set(item);
                 
-                isPickingUpItem = false;
+                //Add to inventory list
                 list.Add(item);
+
+                //Update Client Inventory
                 AddedToInventory(player.Id, item.itemData.itemId, slot.id);
                 player.Movement.EnableMovement();
 
-                //Update other players inventory
+                //Remove item from Item Spawner
+                item.itemSpawner.ItemPickUp();
+
+                //Update teammate inventories
                 foreach (Player otherPlayer in player.otherPlayers)
                     UpdateInventory(player.Id, item.itemData.itemId, otherPlayer.Id,slot.id);
+
+                isPickingUpItem = false;
             }
         }
     }
@@ -219,7 +223,37 @@ public class PlayerInventory : MonoBehaviour
         InventoryFrame.SetActive(false);
     }
 
+    public InventorySlot GetInventorySlot(ushort slotId)
+    {
+        foreach(var slot in inventorySlots)
+        {
+            if (slot.id == slotId)
+                return slot;
+        }
 
+        return null;
+    }
+
+    #region Action Menu
+
+    public static void ActionMenu_Use(ushort fromClientId, ushort slotId)
+    {
+        if (Player.list.TryGetValue(fromClientId, out Player player))
+        {
+            var slot = player.Inventory.GetInventorySlot(slotId);
+
+            if (slot.hasItem && slot.item)
+            {
+                slot.item.Use();
+            }
+            else
+                Debug.Log($"No Item To USE");
+
+        }
+    }
+
+
+    #endregion
 
     #region Message Senders
 
@@ -265,6 +299,17 @@ public class PlayerInventory : MonoBehaviour
 
     #endregion
 
+
+
+    #region Message Handlers 
+
+    [MessageHandler((ushort)ClientToServerId.actionMenu_Use)]
+    private static void ActionMenuUse(ushort fromClientId, Message message)
+    {
+        ActionMenu_Use(fromClientId, message.GetUShort());
+    }
+
+    #endregion
 
 
 

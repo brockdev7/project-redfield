@@ -51,13 +51,33 @@ public class PlayerController : MonoBehaviour
                 ToggleInventoryScreen();
         }
 
+
+        if (Input.GetKeyUp(KeyCode.Backspace))
+        {
+            if (UIManager.Singleton.CurrentInventoryMode == (int)UIManager.InventoryMode.view)
+            {
+                if(UIManager.Singleton.actionMenuIsActive)
+                    UIManager.Singleton.CloseActionMenu();
+            }
+        }
+
         if (Input.GetKeyUp(KeyCode.Escape))
         {
+            #region View Mode
+            if (UIManager.Singleton.CurrentInventoryMode == (int)UIManager.InventoryMode.view)
+            {
+                if (UIManager.Singleton.actionMenuIsActive)
+                    UIManager.Singleton.CloseActionMenu();
+            }
+            #endregion
+
+            #region Pickup Mode
             //Exit Item Pickup Screen
             if (UIManager.Singleton.CurrentInventoryMode == (int)UIManager.InventoryMode.pickUp)
             {
-                UIManager.Singleton.CloseInventoryScreen();
-            }              
+                UIManager.Singleton.CloseInventoryScreen();         
+            }
+            #endregion
         }
     }
 
@@ -82,6 +102,7 @@ public class PlayerController : MonoBehaviour
             movementDisabled = true;
         }
     }
+
 
     #region Messages
     private void SendInput()

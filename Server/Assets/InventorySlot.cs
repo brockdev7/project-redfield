@@ -12,7 +12,7 @@ public class InventorySlot : Button
     [SerializeField] public bool isSelected = false;
     [SerializeField] public bool hasItem = false;
     [SerializeField] public Image slotImage;
-    [SerializeField] public ItemData itemData;
+    [SerializeField] public Item item;
     [SerializeField] public TextMeshProUGUI itemName;
 
     public EventSystem eventSystem;
@@ -42,10 +42,18 @@ public class InventorySlot : Button
         isSelected = false;
     }
 
-    public void Set(ItemData _itemData)
+    public void Set(Item _item)
     {
-        itemData = _itemData;
-        itemName.text = _itemData.itemName;
+        item = _item;
+        itemName.text = _item.itemData.itemName;
+        hasItem = true;
+    }
+
+    public void Remove()
+    {
+        item = null;
+        itemName.text = String.Empty;
+        hasItem = false;
     }
 
     public override void OnSelect(BaseEventData eventData)

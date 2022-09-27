@@ -28,23 +28,26 @@ public class UIManager : MonoBehaviour
         }
     }
 
+
     //REGISTER/DE-REGISTER EVENTS
     public void OnEnable()
     {
-        InventorySlot.OnInventorySlotSubmit += SubmitInventorySlot ;
+        InventorySlot.OnInventorySlotSubmit += SubmitInventorySlot;
         InventorySlot.OnInventorySlotMove += UpdateInventoryData;
+        InfoButton.OnInfoButtonMove += UpdateInventoryData;
     }
 
     public void OnDisable()
     {
         InventorySlot.OnInventorySlotSubmit -= SubmitInventorySlot;
         InventorySlot.OnInventorySlotMove -= UpdateInventoryData;
+        InfoButton.OnInfoButtonMove -= UpdateInventoryData;
     }
 
     public void Awake()
     {
         Singleton = this;
-       
+
         connectScreen.SetActive(true);
         usernameField.interactable = true;
 
@@ -59,18 +62,21 @@ public class UIManager : MonoBehaviour
     [Header("Inventory Screen")]
     [Header("-------------------------------------")]
     [SerializeField] private GameObject inventoryScreen;
+    [SerializeField] private GameObject actionMenu;
     [SerializeField] private GameObject header;
     [SerializeField] private GameObject renderView;
-    [SerializeField] private Button slot1;  
+    [SerializeField] private Button slot1;
     [SerializeField] private TextMeshProUGUI itemName;
     [SerializeField] private TextMeshProUGUI itemDesc;
     [SerializeField] private List<InventorySlot> inventorySlots;
     [SerializeField] private GameObject teamFrames;
     [SerializeField] private int inventoryMode;
+    [SerializeField] public InventoryAudio inventoryAudio;
 
     public int CurrentInventoryMode => inventoryMode;
 
     public bool inventoryScreenIsActive { get { return inventoryScreen.activeInHierarchy; } }
+    public bool actionMenuIsActive { get { return actionMenu.activeInHierarchy; } }
     public enum InventoryMode
     {
         view = 1,
@@ -78,6 +84,8 @@ public class UIManager : MonoBehaviour
     }
 
     #region Methods
+
+
     //View Mode
     public void OpenInventoryScreen()
     {
@@ -88,16 +96,37 @@ public class UIManager : MonoBehaviour
         inventoryScreen.SetActive(true);
     }
 
+    //Enables or disables info button interactivity
+    public void SetInfoButtonInteractivity(bool toggle)
+    {     
+        foreach (Transform headerObj in header.transform)
+        {
+            var btn = headerObj.gameObject.GetComponent<Button>();
+            btn.interactable = toggle;
+        }
+    }
+
+    //Enables or disables inventory slot interactivity
+    public void SetInventorySlotInteractivity(bool toggle)
+    {
+        foreach(var slot in inventorySlots)
+        {
+            var btn = slot.GetComponent<Button>();
+            btn.interactable = toggle;         
+        }
+    }
+
     //Pickup Mode
     public void OpenInventoryScreen(ushort _itemId, ushort _spawnerId, Player _player)
     {
         SetViewMode(InventoryMode.pickUp);
-
+        DisableHeaderButtons();
+        SetTeammateInventoryInteractivity(false);
+       
         var itemData = GameLogic.Singleton.GetItemData(_itemId);
 
         if (itemData)
-        {
-            DisableHeaderButtons();
+        {           
             inventoryScreen.SetActive(true);
             slot1.Select();
 
@@ -110,8 +139,25 @@ public class UIManager : MonoBehaviour
     public void CloseInventoryScreen()
     {
         CleanupInventoryScreen();
-
         inventoryScreen.SetActive(false);
+        SetTeammateInventoryInteractivity(true);
+    }
+
+    public InventorySlot GetSelectedSlot()
+    {
+        foreach (InventorySlot slot in inventorySlots)
+        {
+            if (slot.isSelected)
+                return slot;
+        }
+
+        return null;
+    }
+    public void ClearInventoryData()
+    {
+        CleanupInventoryScreen();
+        itemName.text = "";
+        itemDesc.text = "";
     }
 
     public void SetViewMode(InventoryMode mode)
@@ -192,6 +238,98 @@ public class UIManager : MonoBehaviour
 
     #endregion
 
+    #region Action Menu
+    public void OpenActionMenu()
+    {
+        //inventoryAudio.PlayActionMenuOpen();
+
+        //Activate/Deactivate ActionMenu Action's
+        EnableActionMenuButtons();
+
+        //Disable Interactivity
+        SetInfoButtonInteractivity(false);
+        SetInventorySlotInteractivity(false);
+        SetTeammateInventoryInteractivity(false);
+    
+        actionMenu.SetActive(true);
+
+        //Select first action button
+        var btn = GetFirstEnabledActionMenuButton();
+        btn.Select();
+    }
+
+    public void CloseActionMenu()
+    {
+        //inventoryAudio.PlayActionMenuClose();
+        actionMenu.SetActive(false);
+
+        //Enable Interactivity
+        SetInfoButtonInteractivity(true);
+        SetInventorySlotInteractivity(true);
+        SetTeammateInventoryInteractivity(true);
+
+        //Select previously selected slot
+        var slot = GetSelectedSlot();
+        slot.GetComponent<Button>().Select();
+    }
+
+    public void OnActionMenu_Use()
+    {
+        CloseActionMenu();
+        var slotId = GetSelectedSlot().id;
+        actionMenuUse(slotId);
+    }
+
+    public void EnableActionMenuButtons()
+    {
+        //Get Slot Item & determine commands
+        var slot = GetSelectedSlot();
+        var item = GetInventorySlot(slot.id);
+
+        var equipBtn = actionMenu.transform.Find("EQUIP").GetComponent<Button>();
+        var useBtn = actionMenu.transform.Find("USE").GetComponent<Button>();
+        var combineBtn = actionMenu.transform.Find("COMBINE").GetComponent<Button>();
+        var tradeBtn = actionMenu.transform.Find("TRADE").GetComponent<Button>();
+
+        //Set Equip Btn
+        if (item.itemData.isEquippable)
+            equipBtn.gameObject.SetActive(true);
+        else
+            equipBtn.gameObject.SetActive(false);
+
+        //Set Use Btn
+        if (item.itemData.isUsable)
+            useBtn.gameObject.SetActive(true);
+        else
+            useBtn.gameObject.SetActive(false);
+
+        //Set Combine Btn
+        if (item.itemData.isCombinable)
+            combineBtn.gameObject.SetActive(true);
+        else
+            combineBtn.gameObject.SetActive(false);
+
+        if (item.itemData.isTradable)
+            tradeBtn.gameObject.SetActive(true);
+        else
+            tradeBtn.gameObject.SetActive(false);
+    }
+
+    public Button GetFirstEnabledActionMenuButton()
+    {
+        foreach(Transform t in actionMenu.transform)
+        {
+            var action = t.gameObject;
+
+            if (action.activeSelf)
+                return action.GetComponent<Button>();
+        }
+
+        return null;
+    }
+
+    #endregion
+
     #region Teammate Inventory Methods
     public void AddToTeammateInventory(int teammateId, ItemData item, int slotId)
     {
@@ -242,10 +380,26 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void SetTeammateInventoryInteractivity(bool toggle)
+    {
+        foreach (Transform frame in teamFrames.transform)
+        {
+            if (!frame.gameObject.activeSelf)
+                continue;
+
+            var teamSlots = frame.GetComponentsInChildren<Button>();
+
+            foreach (var slot in teamSlots)
+                slot.interactable = toggle;
+        }
+    }
+
     #endregion
 
     #region Events
 
+
+    //Called on InventorySlot.OnMove();
     public void UpdateInventoryData(InventorySlot _slot)
     {
         if (inventoryMode == (int)InventoryMode.view)
@@ -259,15 +413,23 @@ public class UIManager : MonoBehaviour
                 }
             }
 
-            //Update RenderModel
-            if (_slot.renderModel)
+            if(_slot.itemData)
             {
-                var renderObj = Instantiate(_slot.renderModel, renderView.transform, false);
-            }
+                //Update RenderModel
+                if (_slot.renderModel)
+                {
+                    var renderObj = Instantiate(_slot.renderModel, renderView.transform, false);
+                }
 
-            //Update Item Info
-            itemName.text = _slot.itemName;
-            itemDesc.text = _slot.itemDesc;
+                //Update Item Info
+                itemName.text = _slot.itemData.itemName;
+                itemDesc.text = _slot.itemData.itemDescription;
+            }
+            else
+            {
+                itemName.text = "";
+                itemDesc.text = "";
+            }
         }
 
     }
@@ -277,9 +439,14 @@ public class UIManager : MonoBehaviour
         // ------ VIEW MODE ----------
         if (inventoryMode == (int)InventoryMode.view)
         {
-            Debug.Log($"{_slot.gameObject.name} selected.");
+            if (_slot && _slot.hasItem)
+            {
+                Debug.Log($"{_slot.gameObject.name} selected.");
+                UIManager.Singleton.OpenActionMenu();
+            }
+            else
+                Debug.Log("Slot is empty, can't open ActionMenu");
         }
-
     }
 
     #endregion
@@ -325,10 +492,11 @@ public class UIManager : MonoBehaviour
     }
 
 
-    public void SlotSelected()
+    public void actionMenuUse(ushort slotId)
     {
-        Message message = Message.Create(MessageSendMode.reliable, ClientToServerId.inventorySlotSelect);   
-        NetworkManager.Singleton.Client.Send(message);
+        Message message = Message.Create(MessageSendMode.reliable, ClientToServerId.actionMenu_Use);
+        message.AddUShort(slotId);
+        NetworkManager.Singleton.Client.Send(message);      
     }
 
     #endregion

@@ -19,3 +19,7 @@ MonoBehaviour:
   renderModel: {fileID: 7811472717983228221, guid: 74319e55bc96e024cb68ca89e3706858, type: 3}
   spawnerModel: {fileID: 1899812007723662944, guid: f32732c4b9e174b438abcd120d76f9c6, type: 3}
   icon: {fileID: 21300000, guid: e3f01749875d8ea4495350e2e1811dcb, type: 3}
+  isEquippable: 0
+  isUsable: 1
+  isCombinable: 1
+  isTradable: 1

@@ -11,6 +11,12 @@ public class Item : MonoBehaviour
     [SerializeField] public ItemData itemData;
     [SerializeField] public ItemSpawner itemSpawner;
 
+    public virtual void Equip() { }
+    public virtual void Use() { }
+    public virtual void Combine() { }
+    public virtual void Present() { }
+
+
     public void Awake()
     {
         itemSpawner = GetComponentInParent<ItemSpawner>();

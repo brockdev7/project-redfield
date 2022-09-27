@@ -12,4 +12,8 @@ public class ItemData : ScriptableObject
     public GameObject renderModel;
     public GameObject spawnerModel;
     public Sprite icon;
+    public bool isEquippable;
+    public bool isUsable;
+    public bool isCombinable;
+    public bool isTradable;
 }
