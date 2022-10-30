@@ -57,9 +57,9 @@ public class PlayerInventory : MonoBehaviour
                 //Remove item from Item Spawner
                 item.itemSpawner.ItemPickUp();
 
-                //Update teammate inventories
-                foreach (Player otherPlayer in player.otherPlayers)
-                    UpdateInventory(player.Id, item.itemData.itemId, otherPlayer.Id,slot.id);
+                ////Update teammate inventories
+                //foreach (Player otherPlayer in player.otherPlayers)
+                //    UpdateInventory(player.Id, item.itemData.itemId, otherPlayer.Id,slot.id);
 
                 isPickingUpItem = false;
             }
@@ -90,7 +90,6 @@ public class PlayerInventory : MonoBehaviour
         OpenInventoryFrame();
 
         player.Movement.DisableMovement();
-        isHolding = item.itemData;
         isPickingUpItem = true;
 
         PickingUpItem(item.itemData.itemId, item.itemSpawner.Id);
@@ -211,7 +210,6 @@ public class PlayerInventory : MonoBehaviour
         
     }
 
-
     public void OpenInventoryFrame()
     {
         inventorySlots[0].Select();
@@ -244,14 +242,29 @@ public class PlayerInventory : MonoBehaviour
 
             if (slot.hasItem && slot.item)
             {
-                slot.item.Use();
+                if (slot.item.itemData.isUsable)
+                    slot.item.Use();
+                else
+                    Debug.Log($"{player.name} attempted to use an item that isn't usable.");
             }
-            else
-                Debug.Log($"No Item To USE");
-
         }
     }
 
+    public static void ActionMenu_Equip(ushort fromClientId, ushort slotId)
+    {
+        if (Player.list.TryGetValue(fromClientId, out Player player))
+        {
+            var slot = player.Inventory.GetInventorySlot(slotId);
+
+            if (slot.hasItem && slot.item)
+            {
+                if (slot.item.itemData.isEquipable)
+                    slot.item.Equip(player.Id,slot.item.itemData.itemId,slot.id);
+                else
+                    Debug.Log($"{player.name} attempted to equip an item that isn't equippable.");
+            }
+        }
+    }
 
     #endregion
 
@@ -265,7 +278,7 @@ public class PlayerInventory : MonoBehaviour
         message.AddUShort(player.Id);
         message.AddUShort(_itemId);
         message.AddUShort(_spawnerId);
-        NetworkManager.Singleton.Server.Send(message, player.Id);
+        NetworkManager.Singleton.Server.SendToAll(message);
     }
 
     public void ExitItemPickup()
@@ -275,7 +288,7 @@ public class PlayerInventory : MonoBehaviour
 
         Message message = Message.Create(MessageSendMode.reliable, ServerToClientId.playerExitItemPickUp);
         message.AddUShort(player.Id);
-        NetworkManager.Singleton.Server.Send(message, player.Id);
+        NetworkManager.Singleton.Server.SendToAll(message);
     }
 
     private void AddedToInventory(ushort _playerId, ushort _itemId, ushort _slotId)
@@ -284,17 +297,7 @@ public class PlayerInventory : MonoBehaviour
         message.AddUShort(_playerId);
         message.AddUShort(_itemId);
         message.AddUShort(_slotId);
-        NetworkManager.Singleton.Server.Send(message, _playerId);
-    }
-
-    private void UpdateInventory(ushort _playerId,ushort itemId,ushort toClientId, ushort _slotId)
-    {
-        Message message = Message.Create(MessageSendMode.reliable, ServerToClientId.inventoryUpdate);
-        message.AddUShort(_playerId);
-        message.AddUShort(itemId);
-        message.AddUShort(_slotId);
-
-        NetworkManager.Singleton.Server.Send(message,toClientId);
+        NetworkManager.Singleton.Server.SendToAll(message);
     }
 
     #endregion
@@ -308,6 +311,14 @@ public class PlayerInventory : MonoBehaviour
     {
         ActionMenu_Use(fromClientId, message.GetUShort());
     }
+
+
+    [MessageHandler((ushort)ClientToServerId.actionMenu_Equip)]
+    private static void ActionMenuEquip(ushort fromClientId, Message message)
+    {
+        ActionMenu_Equip(fromClientId, message.GetUShort());
+    }
+
 
     #endregion
 

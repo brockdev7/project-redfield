@@ -1,9 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using RiptideNetworking;
+using RiptideNetworking.Transports.SteamTransport;
 using RiptideNetworking.Utils;
 using System;
+using RiptideNetworking;
+using Steamworks;
+
+public enum TransportMode
+{
+    LocalMp,
+    Steam
+}
 
 public enum ServerToClientId : ushort
 {
@@ -12,19 +20,32 @@ public enum ServerToClientId : ushort
     playerPickingItemUp,
     playerExitItemPickUp,
     inventoryItemAdded,
-    inventoryUpdate,
+    inventoryItemPistolEquipped,
     menuInventoryOpened,
     createItemSpawner,
     itemSpawned,
     itemPickedUp,
     sync,
+    animate
 }
 
 public enum ClientToServerId : ushort
 {
+    // <-- Begin Riptide UDP -->
+    #region Riptide UDP
     playerLoggingIn = 1,
+    actionMenu_Equip,
     actionMenu_Use,
     input,
+    #endregion
+    // <-- End Riptide UDP -->
+
+    // <-- Begin Steam Transport -->
+    #region Steam 
+    st_playerName
+    #endregion
+
+    // <-- End Steam Transport -->
 }
 
 public class NetworkManager : MonoBehaviour
@@ -52,6 +73,8 @@ public class NetworkManager : MonoBehaviour
     [SerializeField]  private ushort port;
     [Space(10)]
     [SerializeField] private ushort tickDivergenceTolerance = 1;
+
+    public TransportMode TransportMode { get; set; }
 
     private ushort _serverTick;
 
@@ -85,41 +108,83 @@ public class NetworkManager : MonoBehaviour
 
     private void Start()
     {
+        if (!SteamManager.Initialized)
+        {
+            Debug.LogError("Steam is not initialized!");
+            return;
+        }
+
         RiptideLogger.Initialize(Debug.Log, Debug.Log, Debug.LogWarning, Debug.LogError, false);
 
-        Client = new Client();
-        Client.Connected += DidConnect;
-        Client.ConnectionFailed += FailedToConnect;
-        Client.Disconnected += DidDisconnect;
-        Client.ClientDisconnected += PlayerLeft;
-
+       
         ServerTick = 2;
     }
 
     private void FixedUpdate()
     {
-        Client.Tick();
-        ServerTick++;
+        if (TransportMode == TransportMode.LocalMp)
+        {
+            //Client.Tick();
+            ServerTick++;
+        }
+
+        if(TransportMode == TransportMode.Steam)
+        {
+            //Client.Tick();
+        }
     }
 
     private void OnApplicationQuit()
     {
         Client.Disconnect();
+        Client.Connected -= DidConnect;
+        Client.ConnectionFailed -= FailedToConnect;
+        Client.ClientDisconnected -= PlayerLeft;
+        Client.Disconnected -= DidDisconnect;
     }
 
-    public void Connect()
+    public void ConnectLocalMultiplayer()
     {
+        Client = new Client();
+
+        //Register Client Events
+        Client.Connected += DidConnect;
+        Client.ConnectionFailed += FailedToConnect;
+        Client.ClientDisconnected += PlayerLeft;
+        Client.Disconnected += DidDisconnect;
+
         Client.Connect($"{ip}:{port}");
+    }
+
+    public void ConnectSteam()
+    {
+        Client = new Client(new RiptideNetworking.Transports.SteamTransport.SteamClient());
+
+        //Register Client Events
+        Client.Connected += DidConnect;
+        Client.ConnectionFailed += FailedToConnect;
+        Client.ClientDisconnected += PlayerLeft;
+        Client.Disconnected += DidDisconnect;
     }
 
     private void DidConnect(object sender, EventArgs e)
     {
-        UIManager.Singleton.LogIn();
+        if(TransportMode == TransportMode.LocalMp)
+        {
+            UIManager.Singleton.LogIn();
+        }
+
+        if (TransportMode == TransportMode.Steam)
+        {
+            Message message = Message.Create(MessageSendMode.reliable, ClientToServerId.st_playerName);
+            message.Add(Steamworks.SteamFriends.GetPersonaName());
+            Client.Send(message);
+        }
     }
 
     private void FailedToConnect(object sender, EventArgs e)
     {
-        UIManager.Singleton.BackToMain();
+        UIManager.Singleton.BackToMain();      
     }
 
     private void PlayerLeft(object sender, ClientDisconnectedEventArgs e)
@@ -129,12 +194,12 @@ public class NetworkManager : MonoBehaviour
     }
 
     private void DidDisconnect(object sender, EventArgs e)
-    {
-        UIManager.Singleton.BackToMain();
-
+    {      
         foreach (Player player in Player.list.Values)
             Destroy(player.gameObject);
 
+        Player.list.Clear();
+        UIManager.Singleton.BackToMain();
     }
 
     private void SetTick(ushort serverTick)
@@ -151,10 +216,6 @@ public class NetworkManager : MonoBehaviour
     {
         Singleton.SetTick(message.GetUShort());
     }
-
-
-
-
 
 
 }

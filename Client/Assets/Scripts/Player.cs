@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using RiptideNetworking;
-
+using static PlayerAnimationManager;
 
 public class Player : MonoBehaviour
 {
+
     public static Dictionary<ushort, Player> list = new Dictionary<ushort, Player>();
 
     public ushort Id { get; private set; }
@@ -22,11 +23,10 @@ public class Player : MonoBehaviour
         list.Remove(Id);
     }
 
-    private void Move(ushort tick, Vector3 newPosition, Quaternion newRotation, float playerSpeed)
+    private void Move(ushort tick, Vector3 newPosition, Quaternion newRotation)
     {
         interpolator.NewPositionUpdate(tick, newPosition);
-        interpolator.NewRotationUpdate(tick, newRotation);
-        animationManager.Animate(playerSpeed);
+        interpolator.NewRotationUpdate(tick, newRotation);    
     }
 
     public static void Spawn(ushort id, string username, Vector3 position)
@@ -51,6 +51,7 @@ public class Player : MonoBehaviour
         list.Add(id, player);   
     }
 
+
     #region Message Handlers
 
     [MessageHandler((ushort)ServerToClientId.playerSpawned)]
@@ -64,7 +65,7 @@ public class Player : MonoBehaviour
     private static void PlayerMovement(Message message)
     {
         if (list.TryGetValue(message.GetUShort(), out Player player))
-            player.Move(message.GetUShort(),message.GetVector3(), message.GetQuaternion(),message.GetFloat());
+            player.Move(message.GetUShort(),message.GetVector3(), message.GetQuaternion());
     }
 
 

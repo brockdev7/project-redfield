@@ -27,10 +27,6 @@ public class GameLogic : MonoBehaviour
     [Header("Prefabs")]
     [SerializeField] private GameObject playerPrefab;
 
-    [Header("Items")]
-    [SerializeField] public Item GreenHerb;
-    [SerializeField] public Item RedHerb;
-
     private void Awake()
     {
         Singleton = this;

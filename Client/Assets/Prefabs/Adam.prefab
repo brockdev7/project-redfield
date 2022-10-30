@@ -1919,6 +1919,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 5602480614770536452}
   playerSpeed: 0
+  player: {fileID: 538606263837281199}
+  weightVelocity: 0
+  animTransSmoothTime: 0.2
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  DistanceToGround: 0
 --- !u!95 &5602480614770536452
 Animator:
   serializedVersion: 3
@@ -1929,7 +1936,7 @@ Animator:
   m_GameObject: {fileID: 5330623829968880018}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 75fd9a955909e7e4f89d3c72ae1d8a01, type: 3}
-  m_Controller: {fileID: 9100000, guid: 9d3314e0f9c4d214da3db7218652122d, type: 2}
+  m_Controller: {fileID: 9100000, guid: 2eaea43ac209d3f40b8242b1104fc937, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

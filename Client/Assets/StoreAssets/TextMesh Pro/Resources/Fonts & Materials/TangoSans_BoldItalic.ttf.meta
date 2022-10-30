@@ -1,0 +1,24 @@
+fileFormatVersion: 2
+guid: f856010f6fc09df4f87c2d5969051f22
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - TangoSans
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: e5051e65ee62f174db46c5673302d749, type: 3}
+  - {fileID: 12800000, guid: 831997126c1e3b046b6c81d68c4bab2b, type: 3}
+  - {fileID: 12800000, guid: 543ba20e6dbaebb4db047483eaad1132, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

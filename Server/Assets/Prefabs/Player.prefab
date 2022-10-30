@@ -50,6 +50,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a56054401f41221478f5483cd1323111, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HealthPoints: 100
   inventory: {fileID: 2840694323284209205}
   movement: {fileID: 924171084790967734}
 --- !u!114 &924171084790967734
@@ -75,7 +76,9 @@ MonoBehaviour:
   lookDirection: {fileID: 8914206946543782411}
   targetRotation: {x: 0, y: 0, z: 0, w: 0}
   groundAccel: 10
-  groundDecel: 5
+  walkDecel: 5
+  runDecel: 25
+  idleDecel: 3.5
   moveSpeed: 0.1
   rotationSpeed: 3
   maxForwardSpeed: 3

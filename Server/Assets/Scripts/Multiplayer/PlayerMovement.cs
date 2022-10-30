@@ -1,6 +1,4 @@
-using Assets.Scripts.Multiplayer;
 using RiptideNetworking;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,11 +13,12 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Player player;
     [SerializeField] private CharacterController controller;
     [SerializeField] private float gravity;
-    [SerializeField] public float playerSpeed;
+    [SerializeField] public float playerAnimSpeed;
     [SerializeField] public float walkSpeedModifier = 1f;
-    [SerializeField] public float runSpeedModifier = 2.5f;
+    [SerializeField] public float runSpeedModifier = 3f;
     [SerializeField] public float throttle = 0f;
     [SerializeField] public GameObject lookDirection;
+    [SerializeField] public bool debugAim;
 
     [SerializeField]
     public Quaternion targetRotation;
@@ -27,7 +26,7 @@ public class PlayerMovement : MonoBehaviour
     //Player Movement
     private float gravityAcceleration;
     public float groundAccel = 10f;
-    public float groundDecel = 5f;
+    public float groundDecel = 6f;
     public float moveSpeed = 3f;
     public float rotationSpeed = 3f;
     public float maxForwardSpeed = 3f;
@@ -38,18 +37,20 @@ public class PlayerMovement : MonoBehaviour
     private bool didTeleport;
 
     private bool[] inputs;
+  
     private bool freezeMovement = false;
     private float yVelocity;
 
-
     Dictionary<string, bool> InputMap = new Dictionary<string, bool>();
 
-    //State
-    public bool isMoving
+    //Locomotion State
+    public bool isIdle
     {
-        get { return !inputs.All(x => !x); }
+        get 
+        {
+            return !isWalking && !isRunning;
+        }
     }
-
     public bool isWalking
     {
         get
@@ -60,12 +61,24 @@ public class PlayerMovement : MonoBehaviour
                 return false;
         }
     }
-
-    bool isRunning
+    public bool isRunning
     {
         get
         {
             if ((InputMap["W"] || InputMap["A"] || InputMap["S"] || InputMap["D"]) && InputMap["LShift"])
+                return true;
+            else
+                return false;
+        }
+    }
+    public bool isAttacking
+    {
+        get
+        {
+            if (debugAim)
+                return true;
+
+            if (InputMap["RightClick"])
                 return true;
             else
                 return false;
@@ -87,14 +100,16 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         Initialize();
-        inputs = new bool[9];
+        inputs = new bool[11];
         currentCamera = Camera.main;
+        debugAim = false;
+
         gravityAcceleration = gravity * Time.fixedDeltaTime * Time.fixedDeltaTime;
     }
 
     private void FixedUpdate()
     {
-        if(lookDirection)
+        if (lookDirection)
             Debug.DrawRay(lookDirection.transform.position, lookDirection.transform.forward, Color.green);
 
         UpdateKeyMap(inputs);
@@ -113,8 +128,34 @@ public class PlayerMovement : MonoBehaviour
         if (InputMap["D"])
             inputDirection.x += 1;
 
+        if (isWalking)
+        {
+            if (player.LocomotionMode != PlayerLocomotionMode.Walk)
+                player.SetLocomotionMode(PlayerLocomotionMode.Walk);
+        }
+        else if (isRunning)
+        {
+            if (player.LocomotionMode != PlayerLocomotionMode.Run)
+                player.SetLocomotionMode(PlayerLocomotionMode.Run);
+        }
+        else if(playerAnimSpeed == 0)
+        {
+            if (player.LocomotionMode != PlayerLocomotionMode.Idle)
+                player.SetLocomotionMode(PlayerLocomotionMode.Idle);
+        }
+
+        if (isAttacking)
+        {
+            if(player.PlayerStance != PlayerStance.Attack)
+                player.SetAttackStance(PlayerStance.Attack);
+        }
+        else if(!isAttacking)
+        {
+            player.SetAttackStance(PlayerStance.Idle);
+        }
+            
+        Animate();
         Move(inputDirection);
-    
     }
 
     public bool isPressed(string button)
@@ -158,6 +199,17 @@ public class PlayerMovement : MonoBehaviour
 
         //Calculate forward/right movement * moveSpeed modifier
         Vector3 movement = Vector3.zero;
+
+        //If Running/Aiming
+        if (isRunning && isAttacking)
+            moveSpeed = walkSpeedModifier;
+
+        if (isRunning && !isAttacking)
+            moveSpeed = runSpeedModifier;
+
+        if (isWalking)
+            moveSpeed = walkSpeedModifier;
+       
         movement += right * (xInput * moveSpeed * Time.deltaTime);
         movement += forward * (zInput * moveSpeed * Time.deltaTime);
 
@@ -165,39 +217,18 @@ public class PlayerMovement : MonoBehaviour
         {
             yVelocity = 0f;
 
-            //TODO: Update last known player rotation/target rotation to the client before the lerp server side
             //Rotate players towards input direction relative to camera position.
-            if (movement != Vector3.zero)
+            if (movement != Vector3.zero && !isAttacking)
             {
-                targetRotation = Quaternion.LookRotation(movement, Vector3.up);                
+                targetRotation = Quaternion.LookRotation(movement, Vector3.up);
                 controller.transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             }
-         
-            //Affect desired speed based on player state
-            if (isWalking)
-            {
-                //Calculate Desired Player Animation Speed
-                desiredSpeed = _inputDirection.magnitude * maxForwardSpeed * 1;
-                acceleration = isMoving ? groundAccel  : groundDecel ;
-                playerSpeed = Mathf.MoveTowards(playerSpeed, desiredSpeed, acceleration * Time.deltaTime);
 
-                moveSpeed = walkSpeedModifier;
-            }
-
-            if (isRunning)
-            {
-                //Calculate Desired Player Animation Speed
-                desiredSpeed = _inputDirection.magnitude * maxForwardSpeed * 2;
-                acceleration = isMoving ? groundAccel  : groundDecel;
-                playerSpeed = Mathf.MoveTowards(playerSpeed, desiredSpeed, acceleration * Time.deltaTime);
-
-                moveSpeed = runSpeedModifier;
-            }
-
-            if (!isWalking && !isRunning)
-                playerSpeed = Mathf.MoveTowards(playerSpeed, 0f, groundDecel * Time.deltaTime);
-
-
+            //Calculate Desired Player Animation Speed
+            maxForwardSpeed = isRunning ? 5 : 3;
+            desiredSpeed = _inputDirection.magnitude * maxForwardSpeed;
+            acceleration = isIdle ? groundDecel : groundAccel;
+            playerAnimSpeed = Mathf.MoveTowards(playerAnimSpeed, desiredSpeed, acceleration * Time.deltaTime);
         }
 
         yVelocity += gravityAcceleration;
@@ -220,8 +251,11 @@ public class PlayerMovement : MonoBehaviour
             { "LShift", inputs[5] },
             { "Esc", inputs[6] },
             { "Space", inputs[7] },
-            { "Return", inputs[8] }
+            { "Return", inputs[8] },
+            { "RightClick", inputs[9] },
+            { "RightClickUp", inputs[10] }
         };
+
     }
 
     public void SetInput(bool[] inputs)
@@ -229,10 +263,11 @@ public class PlayerMovement : MonoBehaviour
         this.inputs = inputs;
     }
 
+    #region Message Senders
     private void SendMovement()
     {
-        //Only send movement data on server's 2nd tick (reduce data being sent)
-        if (NetworkManager.Singleton.CurrentTick % 2 != 0)
+        //Only send movement data on server's 3rd tick (reduce data being sent)
+        if (NetworkManager.Singleton.CurrentTick % 3 != 0)
             return;
 
         Message message = Message.Create(MessageSendMode.unreliable, ServerToClientId.playerMovement);
@@ -240,7 +275,34 @@ public class PlayerMovement : MonoBehaviour
         message.AddUShort(NetworkManager.Singleton.CurrentTick);
         message.AddVector3(transform.position);
         message.AddQuaternion(transform.rotation);
-        message.AddFloat(playerSpeed);
+
         NetworkManager.Singleton.Server.SendToAll(message);
     }
+    #endregion
+
+    private void Animate()
+    {
+        Message message = Message.Create(MessageSendMode.unreliable, ServerToClientId.animate);
+        message.AddUShort(player.Id);
+        message.AddFloat(playerAnimSpeed);
+        message.AddInt((int)player.PlayerStance);
+        message.AddInt((int)player.LocomotionMode);
+        message.AddFloat(inputDirection.x);
+        message.AddFloat(inputDirection.z);
+
+        NetworkManager.Singleton.Server.SendToAll(message);
+    }
+
+
+    #region Message Handlers
+    [MessageHandler((ushort)ClientToServerId.input)]
+    private static void Input(ushort fromClientId, Message message)
+    {
+        if (Player.list.TryGetValue(fromClientId, out Player player))
+        {
+            player.Movement.SetInput(message.GetBools(11));
+        }
+    }
+
+    #endregion
 }

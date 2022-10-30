@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 1
   itemName: Green Herb
-  itemDescription: Restores a small amount of health. Efficiency can be improved
-    by combining with other herbs.
-  RenderModel: {fileID: 8160728580042584625, guid: c6f3413418aaaa14483b2156a0d72694, type: 3}
+  isEquipable: 0
+  isUsable: 1
+  isCombinable: 1
+  isTradable: 1

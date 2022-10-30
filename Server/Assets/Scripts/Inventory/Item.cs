@@ -6,25 +6,17 @@ using RiptideNetworking;
 
 public class Item : MonoBehaviour
 {
-    public static event Action OnItemCollected;
-
     [SerializeField] public ItemData itemData;
     [SerializeField] public ItemSpawner itemSpawner;
 
-    public virtual void Equip() { }
+    public virtual void Equip(ushort playerId, ushort itemId, ushort slotId) { }
     public virtual void Use() { }
     public virtual void Combine() { }
     public virtual void Present() { }
 
-
     public void Awake()
     {
         itemSpawner = GetComponentInParent<ItemSpawner>();
-    }
-
-    public void Collect()
-    {
-        OnItemCollected?.Invoke();
     }
 
     private void OnTriggerStay(Collider collision)
@@ -60,7 +52,6 @@ public class Item : MonoBehaviour
                 {
                     _player.Movement.EnableMovement();
 
-                    _player.Inventory.isHolding = null;
                     _player.Inventory.CloseInventoryFrame();
                     _player.Inventory.ExitItemPickup();                    
                 }

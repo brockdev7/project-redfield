@@ -14,5 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemId: 2
   itemName: Red Herb
-  itemDescription: Can be combined with Greeb Herbs to create a full heal.
-  RenderModel: {fileID: 909837441412757383, guid: d46c8efa15a419845ba2b59b2ac9657e, type: 3}
+  isEquipable: 0
+  isUsable: 1
+  isCombinable: 1
+  isTradable: 1

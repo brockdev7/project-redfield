@@ -11,19 +11,16 @@ public class GreenHerb : Item
     public override void Use()
     {
         Debug.Log("Using a Green Herb");
-        base.Use();
     }
 
     public override void Combine()
     {
         Debug.Log("Combining a Green Herb");
-        base.Use();
     }
 
     public override void Present()
     {
         Debug.Log("Presenting a Green Herb");
-        base.Use();
     }
 }
 

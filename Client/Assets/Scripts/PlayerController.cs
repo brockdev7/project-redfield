@@ -1,14 +1,17 @@
 using RiptideNetworking;
 using UnityEngine;
+using static PlayerAnimationManager;
 
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] private Player player;
+
     private bool[] inputs;
     public bool movementDisabled = false;
 
     private void Start()
     {
-        inputs = new bool[9];
+        inputs = new bool[11];
     }
 
     private void Update()
@@ -39,10 +42,21 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Space))
             inputs[7] = true;
-
+        
         if (Input.GetKey(KeyCode.Return))
             inputs[8] = true;
 
+        //Right Click
+        if (Input.GetMouseButton(1))
+        {
+            inputs[9] = true;
+        }
+           
+        //Right Click Up
+        if (Input.GetMouseButtonUp(1))
+        {
+            inputs[10] = true;
+        }
 
         if (Input.GetKeyUp(KeyCode.Tab))
         {
@@ -79,10 +93,7 @@ public class PlayerController : MonoBehaviour
             }
             #endregion
         }
-    }
 
-    private void FixedUpdate()
-    {
         SendInput();
 
         for (int i = 0; i < inputs.Length; i++)

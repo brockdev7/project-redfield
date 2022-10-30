@@ -34,8 +34,9 @@ public class GameLogic : MonoBehaviour
     [Header("Items")]
     [SerializeField] private ItemData GreenHerb;
     [SerializeField] private ItemData RedHerb;
+    [SerializeField] private ItemData Pistol;
 
-    public ItemData GetItemData(ushort itemId)
+    public ItemData GetItemData(ushort itemId) 
     {
         if (itemList.TryGetValue(itemId, out ItemData item))
             return item;
@@ -64,7 +65,8 @@ public class GameLogic : MonoBehaviour
         itemList = new Dictionary<int, ItemData>()
         {
             {1, GreenHerb },
-            {2, RedHerb }
+            {2, RedHerb },
+            {3, Pistol }
         };
     }
 }

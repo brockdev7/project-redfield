@@ -14,12 +14,14 @@ public class PlayerInventory : MonoBehaviour
     {
         if (Player.list.TryGetValue(message.GetUShort(), out Player player))
         {
-            var itemId = message.GetUShort();
-            var spawnerId = message.GetUShort();
+            if (player.Id == NetworkManager.Singleton.Client.Id)
+            {
+                var itemId = message.GetUShort();
+                var spawnerId = message.GetUShort();
+                UIManager.Singleton.OpenInventoryScreen(itemId, spawnerId, player);
+            }
 
-            player.animationManager.EnterItemPickUp();
-
-            UIManager.Singleton.OpenInventoryScreen(itemId,spawnerId, player);
+            player.animationManager.EnterItemPickUp();         
         }
     }
 
@@ -28,9 +30,22 @@ public class PlayerInventory : MonoBehaviour
     {
         if (Player.list.TryGetValue(message.GetUShort(), out Player player))
         {
+            if (player.Id == NetworkManager.Singleton.Client.Id)
+            {            
+                UIManager.Singleton.SetViewMode(InventoryMode.view);
+                UIManager.Singleton.CloseInventoryScreen();
+            }
+
             player.animationManager.ExitItemPickUp();
-            UIManager.Singleton.SetViewMode(InventoryMode.view);
-            UIManager.Singleton.CloseInventoryScreen();
+        }
+    }
+
+    [MessageHandler((ushort)ServerToClientId.inventoryItemPistolEquipped)]
+    private static void PistolEquipped(Message message)
+    {
+        if (Player.list.TryGetValue(message.GetUShort(), out Player player))
+        {
+            player.animationManager.EquipPistol();
         }
     }
 
@@ -43,38 +58,30 @@ public class PlayerInventory : MonoBehaviour
             var itemData = GameLogic.Singleton.GetItemData(itemId);
             var slotId = message.GetUShort();
 
-            var slot = UIManager.Singleton.GetInventorySlot(slotId);
+            if (player.Id == NetworkManager.Singleton.Client.Id)
+            {
+                var slot = UIManager.Singleton.GetInventorySlot(slotId);
 
-            //Update Slot Data
-            if(slot)
-                slot.Set(itemData);
+                //Update Slot Data
+                if (slot)
+                    slot.Set(itemData);
+
+                UIManager.Singleton.SetViewMode(InventoryMode.view);
+                UIManager.Singleton.CloseInventoryScreen();
+            }
+            else
+            {
+                UIManager.Singleton.AddToTeammateInventory(player.Id, itemData, slotId);
+            }
 
             //Add Item To Inventory
             player.inventory.list.Add(itemData);
   
             //Exit Player Kneel Animation
-            player.animationManager.ExitItemPickUp();
-
-            UIManager.Singleton.SetViewMode(InventoryMode.view);
-            UIManager.Singleton.CloseInventoryScreen();          
+            player.animationManager.ExitItemPickUp();       
         }
     }
 
-    [MessageHandler((ushort)ServerToClientId.inventoryUpdate)]
-    private static void InventoryUpdate(Message message)
-    {    
-        if (Player.list.TryGetValue(message.GetUShort(), out Player teammate))
-        {
-            var itemId = message.GetUShort();
-            var itemData = GameLogic.Singleton.GetItemData(itemId);
-            var slotId = message.GetUShort();
-
-            teammate.inventory.list.Add(itemData);
-            UIManager.Singleton.AddToTeammateInventory(teammate.Id,itemData,slotId);
-
-            Debug.Log($"{teammate.gameObject.name} has added a {itemData.itemName} to their inventory.");
-        }      
-    }
     #endregion
 
 

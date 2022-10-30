@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - ObjectViewerModel
+  - Walkable
+  - '  mainMenu.SetActive(true);'
   layers:
   - Default
   - TransparentFX
@@ -12,7 +14,7 @@ TagManager:
   - UI-3DObj
   - Water
   - UI
-  - 
+  - UI-Fx
   - 
   - 
   - 
@@ -39,9 +41,12 @@ TagManager:
   - 
   - 
   m_SortingLayers:
-  - name: IconSprite
-    uniqueID: 543550171
-    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: UI-3DObj
+    uniqueID: 3836771155
+    locked: 0
+  - name: UI
+    uniqueID: 626904043
     locked: 0

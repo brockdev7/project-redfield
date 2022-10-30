@@ -8,7 +8,10 @@ public class Player : MonoBehaviour
 {
     public ushort Id { get; private set; }
     public string Username { get; private set; }
-    [SerializeField] public float HealthPoints = 70f;
+    public PlayerStance PlayerStance { get; private set; }
+    public PlayerLocomotionMode LocomotionMode { get; private set; }
+
+    [SerializeField] public float HealthPoints = 100f;
 
     public static Dictionary<ushort, Player> list = new Dictionary<ushort, Player>();
     public  List<Player> otherPlayers
@@ -22,12 +25,35 @@ public class Player : MonoBehaviour
     [SerializeField]  private PlayerInventory inventory;
     [SerializeField]  private PlayerMovement movement;
 
+    public void Awake()
+    {
+        PlayerStance = PlayerStance.Idle;
+    }
+
     private void OnDestroy()
     {        
         list.Remove(Id);
     }
 
     #region Player Methods
+
+    public void SetAttackStance(PlayerStance stance)
+    {
+        PlayerStance = stance;
+    }
+
+    public void SetLocomotionMode(PlayerLocomotionMode mode)
+    {
+        LocomotionMode = mode;
+    }
+    #endregion
+
+
+
+
+
+
+    #region Riptide UDP
 
     public static void SpawnPlayer(ushort id, string username)
     {
@@ -40,7 +66,7 @@ public class Player : MonoBehaviour
             otherPlayer.SendSpawnData(id);
 
         Player player = Instantiate(GameLogic.Singleton.PlayerPrefab, new Vector3(9.4f, 0f, 9.4f), Quaternion.identity).GetComponent<Player>();
-        
+
         player.name = $"Player {id} ({(string.IsNullOrEmpty(username) ? "Guest" : username)})";
         player.Id = id;
         player.Username = string.IsNullOrEmpty(username) ? $"Guest: {id}" : username;
@@ -52,22 +78,21 @@ public class Player : MonoBehaviour
         list.Add(id, player);
     }
 
-    #endregion
-
 
     #region Message Senders
+    //Sends player spawn data to a specific client on the server
+    public void SendSpawnData(ushort toClientId)
+    {
+        NetworkManager.Singleton.Server.Send(AddSpawnData(Message.Create(MessageSendMode.reliable, ServerToClientId.playerSpawned)), toClientId);
+    }
 
     //Sends player spawn data to all players currently on the server
-    private void SendSpawnData()
+    public void SendSpawnData()
     {
         NetworkManager.Singleton.Server.SendToAll(AddSpawnData(Message.Create(MessageSendMode.reliable, ServerToClientId.playerSpawned)));
     }
 
-    //Sends player spawn data to a specific client on the server
-    private void SendSpawnData(ushort toClientId)
-    {
-        NetworkManager.Singleton.Server.Send(AddSpawnData(Message.Create(MessageSendMode.reliable, ServerToClientId.playerSpawned)),toClientId);
-    }
+
 
     #endregion
 
@@ -93,15 +118,7 @@ public class Player : MonoBehaviour
         SpawnPlayer(fromClientId, message.GetString());
     }
 
-    [MessageHandler((ushort)ClientToServerId.input)]
-    private static void Input(ushort fromClientId, Message message)
-    {
-        if (list.TryGetValue(fromClientId, out Player player))
-        {
-            player.Movement.SetInput(message.GetBools(10));         
-        }
-           
-    }
+    #endregion
 
     #endregion
 
